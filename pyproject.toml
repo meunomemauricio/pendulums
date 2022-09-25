@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="inverted_pendulum"
+version="0.1"
+description="Simulation of an Inverted Pendulum."
+authors=[{name="Mauricio Freitas"}]
+urls={repo="https://github.com/meunomemauricio/inverted_pendulum"}
+readme="README.md"
+license={text = "GPL-3.0-only"}
+requires-python=">=3.10"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering",
+]
+dependencies=[""]
+
+[tool.setuptools]
+packages=["pendulum"]
+
+[tool.black]
+line-length = 79

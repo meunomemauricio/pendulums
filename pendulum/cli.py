@@ -11,6 +11,6 @@ def cli():
 @cli.command()
 def example():
     """Example PyMunk/Pyglet application."""
-    from pendulum.example import main
+    from pendulum.example import pyglet
 
-    main()
+    pyglet.app.run()

@@ -1,24 +1,36 @@
 """Simple Example Pymunk + Pyglet Application."""
 
-import time
-
+import pyglet
 import pymunk
+from pymunk.pyglet_util import DrawOptions
+
+space = pymunk.Space()
+space.gravity = 0, -1000
+
+body = pymunk.Body(mass=1, moment=1666)
+body.position = 640, 700  # x, y
+
+poly = pymunk.Poly.create_box(body=body, size=(50, 50))
+
+space.add(body, poly)
+
+window = pyglet.window.Window(1280, 720, "Inverted Pendulum.", resizable=False)
+options = DrawOptions()
 
 
-def main():
-    space = pymunk.Space()
-    space.gravity = 0, -1000
+@window.event
+def on_draw() -> None:
+    """Screen Draw Event."""
+    window.clear()
+    space.debug_draw(options=options)
 
-    body = pymunk.Body(mass=1, moment=1666)
-    body.position = 50, 100  # x, y
 
-    space.add(body)
+def update(dt: float) -> None:
+    """Update PyMunk's Space state.
 
-    try:
-        while True:
-            space.step(0.02)  # 1/50 (50 FPS)
-            print(body.position)
-            time.sleep(0.5)
+    :param float dt: Time between calls of `update`.
+    """
+    space.step(dt)
 
-    except KeyboardInterrupt:
-        print("Canceled.")
+
+pyglet.clock.schedule_interval(update, interval=1.0 / 60)

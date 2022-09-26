@@ -110,6 +110,9 @@ class SimulationWindow(pyglet.window.Window):
     FPS_FONT_SIZE = 12
     FPS_FONT_COLOR = 255, 0, 0, 200
 
+    #: Distance between the rail endings and the screen width
+    RAIL_OFFSET = 50
+
     def __init__(
         self, width: int = WIDTH, height: int = HEIGHT, caption: str = CAPTION
     ):
@@ -154,7 +157,17 @@ class SimulationWindow(pyglet.window.Window):
         )
         joint_2.collide_bodies = False
 
-        self.space.add(joint_1, joint_2)
+        rail_x_1 = self.RAIL_OFFSET
+        rail_x_2 = self.width - self.RAIL_OFFSET
+        rail_joint = pymunk.constraints.GrooveJoint(
+            a=self.space.static_body,
+            b=self.cart.body,
+            groove_a=(rail_x_1, self.cart.initial_pos[1]),
+            groove_b=(rail_x_2, self.cart.initial_pos[1]),
+            anchor_b=(0, 0),
+        )
+
+        self.space.add(joint_1, joint_2, rail_joint)
 
     def on_draw(self) -> None:
         """Screen Draw Event."""

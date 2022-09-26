@@ -1,7 +1,8 @@
 """Simple Example Pymunk + Pyglet Application."""
 
-import pyglet
 import pymunk
+from pyglet import clock, text, window
+from pyglet.window import key
 from pymunk.pyglet_util import DrawOptions
 
 
@@ -52,6 +53,14 @@ class Cart:
 
         space.add(self.body, self.shape)
 
+    def accelerate_left(self, acceleration: float) -> None:
+        force = self.mass * acceleration
+        self.body.apply_force_at_local_point(force=(-force, 0))
+
+    def accelerate_right(self, acceleration: float) -> None:
+        force = self.mass * acceleration
+        self.body.apply_force_at_local_point(force=(force, 0))
+
 
 class Rod:
     """Main body of the Pendulum, connecting the Circle to the Cart."""
@@ -79,16 +88,16 @@ class Rod:
         space.add(self.body, self.shape)
 
 
-class FPSDisplay(pyglet.window.FPSDisplay):
+class FPSDisplay(window.FPSDisplay):
     """Custom FPS Display."""
 
     FONT_SIZE = 12
     FONT_COLOR = 255, 0, 0, 200
 
-    def __init__(self, window: pyglet.window.Window):
+    def __init__(self, window: window.Window):
         super().__init__(window=window)
 
-        self.label = pyglet.text.Label(
+        self.label = text.Label(
             font_size=self.FONT_SIZE,
             x=self.window.width - self.FONT_SIZE * 8,
             y=self.window.height - self.FONT_SIZE - 1,
@@ -101,7 +110,7 @@ class FPSDisplay(pyglet.window.FPSDisplay):
         self.label.text = f"FPS: {fps:0.2f}"
 
 
-class SimulationWindow(pyglet.window.Window):
+class SimulationWindow(window.Window):
 
     WIDTH = 1280
     HEIGHT = 720
@@ -112,6 +121,9 @@ class SimulationWindow(pyglet.window.Window):
 
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50
+
+    #: Cart Acceleration
+    CART_ACCEL = 100
 
     def __init__(
         self, width: int = WIDTH, height: int = HEIGHT, caption: str = CAPTION
@@ -128,19 +140,25 @@ class SimulationWindow(pyglet.window.Window):
         self.draw_options = DrawOptions()
         self.fps_display = FPSDisplay(window=self)
 
-        pyglet.clock.schedule_interval(self.update, interval=1.0 / 60)
+        clock.schedule_interval(self.update, interval=1.0 / 60)
+
+        self.keyboard = key.KeyStateHandler()
+        self.push_handlers(self.keyboard)
 
     def _create_entities(self) -> None:
         """Create the entities that form the Pendulum."""
         self.circle = Circle(
-            space=self.space, mass=0.1, radius=15.0, initial_pos=(640, 400)
+            space=self.space, mass=0.050, radius=15.0, initial_pos=(640, 400)
         )
         self.cart = Cart(
-            space=self.space, mass=0.5, size=(100, 50), initial_pos=(640, 200)
+            space=self.space,
+            mass=0.150,
+            size=(100, 50),
+            initial_pos=(640, 200),
         )
         self.rod = Rod(
             space=self.space,
-            mass=0.05,
+            mass=0.005,
             a=self.cart.initial_pos,
             b=self.circle.initial_pos,
             radius=2.0,
@@ -181,4 +199,9 @@ class SimulationWindow(pyglet.window.Window):
 
         :param float dt: Time between calls of `update`.
         """
+        if self.keyboard[key.LEFT]:
+            self.cart.accelerate_left(acceleration=self.CART_ACCEL)
+        elif self.keyboard[key.RIGHT]:
+            self.cart.accelerate_right(acceleration=self.CART_ACCEL)
+
         self.space.step(dt)

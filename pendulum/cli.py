@@ -9,8 +9,8 @@ def cli():
 
 
 @cli.command()
-def example():
-    """Example PyMunk/Pyglet application."""
-    from pendulum.example import pyglet
+def simulation():
+    """Run the PyMunk/Pyglet simulation."""
+    from pendulum.simulation import pyglet
 
     pyglet.app.run()

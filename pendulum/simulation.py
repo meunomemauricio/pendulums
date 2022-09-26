@@ -119,7 +119,8 @@ class SimulationWindow(pyglet.window.Window):
         super().__init__(width=width, height=height, caption=caption)
 
         self.space = pymunk.Space()
-        self.space.gravity = 0, 0
+        # TODO: Specify more precise gravity value
+        self.space.gravity = 0, -1000
 
         self._create_entities()
         self._create_constraints()

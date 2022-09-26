@@ -1,6 +1,9 @@
 """Command Line Interface for the Pendulum application."""
 
 import click
+import pyglet
+
+from pendulum.simulation import SimulationWindow
 
 
 @click.group()
@@ -11,6 +14,5 @@ def cli():
 @cli.command()
 def simulation():
     """Run the PyMunk/Pyglet simulation."""
-    from pendulum.simulation import pyglet
-
+    SimulationWindow()
     pyglet.app.run()

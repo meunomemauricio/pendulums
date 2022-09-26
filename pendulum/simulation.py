@@ -82,6 +82,16 @@ space.add(cart.body, cart.shape)
 rod = Rod(mass=0.05, a=cart.initial_pos, b=circle.initial_pos, radius=2.0)
 space.add(rod.body, rod.shape)
 
+joint_1 = pymunk.constraints.PivotJoint(
+    circle.body, rod.body, circle.initial_pos
+)
+joint_1.collide_bodies = False
+
+joint_2 = pymunk.constraints.PivotJoint(rod.body, cart.body, cart.initial_pos)
+joint_2.collide_bodies = False
+
+space.add(joint_1, joint_2)
+
 window = pyglet.window.Window(1280, 720, "Inverted Pendulum.", resizable=False)
 options = DrawOptions()
 

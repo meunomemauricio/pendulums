@@ -125,6 +125,9 @@ class SimulationWindow(window.Window):
     #: Cart Acceleration
     CART_ACCEL = 2000  # mm/s²
 
+    #: Tick Interval
+    INTERVAL = 1.0 / 60
+
     def __init__(
         self, width: int = WIDTH, height: int = HEIGHT, caption: str = CAPTION
     ):
@@ -139,7 +142,7 @@ class SimulationWindow(window.Window):
         self.draw_options = DrawOptions()
         self.fps_display = FPSDisplay(window=self)
 
-        clock.schedule_interval(self.update, interval=1.0 / 60)
+        clock.schedule_interval(self.update, interval=self.INTERVAL)
 
         self.keyboard = key.KeyStateHandler()
         self.push_handlers(self.keyboard)
@@ -203,4 +206,4 @@ class SimulationWindow(window.Window):
         elif self.keyboard[key.RIGHT]:
             self.cart.accelerate_right(acceleration=self.CART_ACCEL)
 
-        self.space.step(dt)
+        self.space.step(self.INTERVAL)

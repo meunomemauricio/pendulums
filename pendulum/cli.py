@@ -4,6 +4,7 @@ import click
 import pyglet
 
 from pendulum.models.cart_pendulum import CartPendulum
+from pendulum.models.fixed_pendulum import FixedPendulum
 
 
 @click.group()
@@ -21,4 +22,5 @@ def cart():
 @cli.command()
 def fixed():
     """Run the PyMunk Fixed Pendulum simulation."""
-    print("TODO: Fixed pendulum.")
+    FixedPendulum()
+    pyglet.app.run()

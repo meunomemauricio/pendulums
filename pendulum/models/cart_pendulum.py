@@ -1,91 +1,31 @@
-"""Simple Example Pymunk + Pyglet Application."""
+"""PyMunk simulation of a Pendulum attached to a moving Cart."""
 import pymunk
 from pyglet import clock, window
 from pyglet.window import key
 from pymunk.pyglet_util import DrawOptions
 
-from pendulum import settings
-from pendulum.utils import FPSDisplay
-
-
-class Circle:
-    """Circle that sits on the end of the pendulum rod."""
-
-    def __init__(
-        self,
-        space: pymunk.Space,
-        mass: float,
-        radius: float,
-        initial_pos: tuple[float, float] = (0, 0),
-    ):
-        self.mass = mass
-        self.radius = radius
-        self.initial_pos = initial_pos
-
-        self.moment = pymunk.moment_for_circle(
-            mass=self.mass, inner_radius=0, outer_radius=self.radius
-        )
-        self.body = pymunk.Body(mass=self.mass, moment=self.moment)
-        self.body.position = initial_pos
-
-        self.shape = pymunk.Circle(body=self.body, radius=self.radius)
-
-        space.add(self.body, self.shape)
-
-
-class Cart:
-    """Cart that carries the Pendulum."""
-
-    #: Cart Acceleration
-    CART_ACCEL = 5000  # mm/s²
-
-    def __init__(
-        self,
-        space: pymunk.Space,
-        mass: float,
-        size: tuple[float, float],
-        initial_pos: tuple[float, float] = (0, 0),
-    ):
-        self.mass = mass
-        self.size = size
-        self.initial_pos = initial_pos
-
-        self.moment = pymunk.moment_for_box(mass=self.mass, size=self.size)
-        self.body = pymunk.Body(mass=self.mass, moment=self.moment)
-        self.body.position = initial_pos
-
-        self.shape = pymunk.Poly.create_box(body=self.body, size=self.size)
-
-        space.add(self.body, self.shape)
-
-    def accelerate_left(self) -> None:
-        """Apply lateral acceleration to the left."""
-        force = self.mass * self.CART_ACCEL * -1
-        self.body.apply_force_at_local_point(force=(force, 0))
-
-    def accelerate_right(self) -> None:
-        """Apply lateral acceleration to the right."""
-        force = self.mass * self.CART_ACCEL
-        self.body.apply_force_at_local_point(force=(force, 0))
+from pendulum import settings as sett
+from pendulum.models.entities import Cart, Circle
+from pendulum.models.utils import FPSDisplay
 
 
 class CartPendulum(window.Window):
 
-    CAPTION = "Inverted Pendulum Simulation"
+    CAPTION = "PyMunk Pendulum on a Cart Simulation"
 
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
     def __init__(
         self,
-        width: int = settings.WIDTH,
-        height: int = settings.HEIGHT,
+        width: int = sett.WIDTH,
+        height: int = sett.HEIGHT,
         caption: str = CAPTION,
     ):
         super().__init__(width=width, height=height, caption=caption)
 
         self.space = pymunk.Space()
-        self.space.gravity = settings.GRAVITY
+        self.space.gravity = sett.GRAVITY
 
         self._create_entities()
         self._create_constraints()
@@ -93,7 +33,7 @@ class CartPendulum(window.Window):
         self.draw_options = DrawOptions()
         self.fps_display = FPSDisplay(window=self)
 
-        clock.schedule_interval(self.update, interval=self.INTERVAL)
+        clock.schedule_interval(self.update, interval=sett.INTERVAL)
 
         self.keyboard = key.KeyStateHandler()
         self.push_handlers(self.keyboard)
@@ -145,4 +85,4 @@ class CartPendulum(window.Window):
         elif self.keyboard[key.RIGHT]:
             self.cart.accelerate_right()
 
-        self.space.step(self.INTERVAL)
+        self.space.step(sett.INTERVAL)

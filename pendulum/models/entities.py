@@ -65,13 +65,13 @@ class Cart:
 
     def accelerate_left(self) -> None:
         """Apply lateral acceleration to the left."""
-        force = self.mass * self.CART_ACCEL * -1
-        self.body.apply_force_at_local_point(force=(force, 0))
+        force = self.mass * Vec2d(-self.CART_ACCEL, 0)
+        self.body.apply_force_at_local_point(force=force)
 
     def accelerate_right(self) -> None:
         """Apply lateral acceleration to the right."""
-        force = self.mass * self.CART_ACCEL
-        self.body.apply_force_at_local_point(force=(force, 0))
+        force = self.mass * Vec2d(self.CART_ACCEL, 0)
+        self.body.apply_force_at_local_point(force=force)
 
 
 class Fixed:

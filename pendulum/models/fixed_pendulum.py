@@ -59,15 +59,15 @@ class FixedPendulum(window.Window):
     @property
     def _rod_vector(self) -> Vec2d:
         """Vector from the Fixed point to the center of the Circle."""
-        return self.fixed.body.position - self.circle.body.position
+        return self.circle.body.position - self.fixed.body.position
 
     def _accelerate_cw(self):
         """Apply a Clockwise force to the pendulum."""
-        self.circle.accelerate(dir=self._rod_vector.rotated_degrees(90))
+        self.circle.accelerate(dir=self._rod_vector.rotated_degrees(-90))
 
     def _accelerate_ccw(self):
         """Apply a Counter Clockwise force to the pendulum."""
-        self.circle.accelerate(dir=self._rod_vector.rotated_degrees(-90))
+        self.circle.accelerate(dir=self._rod_vector.rotated_degrees(90))
 
     def on_draw(self) -> None:
         """Screen Draw Event."""

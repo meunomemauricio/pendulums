@@ -3,7 +3,8 @@
 import click
 import pyglet
 
-from pendulum.simulation import SimulationWindow
+from pendulum.models.cart_pendulum import CartPendulum
+from pendulum.models.fixed_pendulum import FixedPendulum
 
 
 @click.group()
@@ -12,7 +13,14 @@ def cli():
 
 
 @cli.command()
-def simulation():
-    """Run the PyMunk/Pyglet simulation."""
-    SimulationWindow()
+def cart():
+    """Run PyMunk Cart Pendulum simulation."""
+    CartPendulum()
+    pyglet.app.run()
+
+
+@cli.command()
+def fixed():
+    """Run the PyMunk Fixed Pendulum simulation."""
+    FixedPendulum()
     pyglet.app.run()

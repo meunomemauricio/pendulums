@@ -34,6 +34,9 @@ class Circle:
 class Cart:
     """Cart that carries the Pendulum."""
 
+    #: Cart Acceleration
+    CART_ACCEL = 5000  # mm/s²
+
     def __init__(
         self,
         space: pymunk.Space,
@@ -53,39 +56,15 @@ class Cart:
 
         space.add(self.body, self.shape)
 
-    def accelerate_left(self, acceleration: float) -> None:
-        force = self.mass * acceleration
-        self.body.apply_force_at_local_point(force=(-force, 0))
-
-    def accelerate_right(self, acceleration: float) -> None:
-        force = self.mass * acceleration
+    def accelerate_left(self) -> None:
+        """Apply lateral acceleration to the left."""
+        force = self.mass * self.CART_ACCEL * -1
         self.body.apply_force_at_local_point(force=(force, 0))
 
-
-class Rod:
-    """Main body of the Pendulum, connecting the Circle to the Cart."""
-
-    def __init__(
-        self,
-        space: pymunk.Space,
-        mass: float,
-        a: tuple[float, float],
-        b: tuple[float, float],
-        radius: float,
-    ):
-        self.mass = mass
-        self.a = a
-        self.b = b
-        self.radius = radius
-
-        self.moment = pymunk.moment_for_segment(
-            mass=mass, a=a, b=b, radius=radius
-        )
-        self.body = pymunk.Body(mass=mass, moment=self.moment)
-
-        self.shape = pymunk.Segment(body=self.body, a=a, b=b, radius=radius)
-
-        space.add(self.body, self.shape)
+    def accelerate_right(self) -> None:
+        """Apply lateral acceleration to the right."""
+        force = self.mass * self.CART_ACCEL
+        self.body.apply_force_at_local_point(force=(force, 0))
 
 
 class FPSDisplay(window.FPSDisplay):
@@ -122,9 +101,6 @@ class SimulationWindow(window.Window):
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
-    #: Cart Acceleration
-    CART_ACCEL = 2000  # mm/s²
-
     #: Tick Interval
     INTERVAL = 1.0 / 60
 
@@ -158,25 +134,13 @@ class SimulationWindow(window.Window):
         self.circle = Circle(
             space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 600)
         )
-        self.rod = Rod(
-            space=self.space,
-            mass=0.015,
-            a=self.cart.initial_pos,
-            b=self.circle.initial_pos,
-            radius=2.0,
-        )
 
     def _create_constraints(self) -> None:
         """Create the constraints between the Entities."""
-        joint_1 = pymunk.constraints.PivotJoint(
-            self.circle.body, self.rod.body, self.circle.initial_pos
+        rod_joint = pymunk.constraints.PinJoint(
+            a=self.cart.body,
+            b=self.circle.body,
         )
-        joint_1.collide_bodies = False
-
-        joint_2 = pymunk.constraints.PivotJoint(
-            self.rod.body, self.cart.body, self.cart.initial_pos
-        )
-        joint_2.collide_bodies = False
 
         rail_x_1 = self.RAIL_OFFSET
         rail_x_2 = self.width - self.RAIL_OFFSET
@@ -188,7 +152,7 @@ class SimulationWindow(window.Window):
             anchor_b=(0, 0),
         )
 
-        self.space.add(joint_1, joint_2, rail_joint)
+        self.space.add(rod_joint, rail_joint)
 
     def on_draw(self) -> None:
         """Screen Draw Event."""
@@ -202,8 +166,8 @@ class SimulationWindow(window.Window):
         :param float dt: Time between calls of `update`.
         """
         if self.keyboard[key.LEFT]:
-            self.cart.accelerate_left(acceleration=self.CART_ACCEL)
+            self.cart.accelerate_left()
         elif self.keyboard[key.RIGHT]:
-            self.cart.accelerate_right(acceleration=self.CART_ACCEL)
+            self.cart.accelerate_right()
 
         self.space.step(self.INTERVAL)

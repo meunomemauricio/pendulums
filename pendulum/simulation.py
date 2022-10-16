@@ -120,10 +120,10 @@ class SimulationWindow(window.Window):
     FPS_FONT_COLOR = 255, 0, 0, 200
 
     #: Distance between the rail endings and the screen width
-    RAIL_OFFSET = 50
+    RAIL_OFFSET = 50  # mm
 
     #: Cart Acceleration
-    CART_ACCEL = 100
+    CART_ACCEL = 2000  # mm/s²
 
     def __init__(
         self, width: int = WIDTH, height: int = HEIGHT, caption: str = CAPTION
@@ -131,8 +131,7 @@ class SimulationWindow(window.Window):
         super().__init__(width=width, height=height, caption=caption)
 
         self.space = pymunk.Space()
-        # TODO: Specify more precise gravity value
-        self.space.gravity = 0, -1000
+        self.space.gravity = 0, -9807  # mm/s²
 
         self._create_entities()
         self._create_constraints()
@@ -147,18 +146,18 @@ class SimulationWindow(window.Window):
 
     def _create_entities(self) -> None:
         """Create the entities that form the Pendulum."""
-        self.circle = Circle(
-            space=self.space, mass=0.050, radius=15.0, initial_pos=(640, 400)
-        )
         self.cart = Cart(
             space=self.space,
-            mass=0.150,
-            size=(100, 50),
+            mass=0.200,
+            size=(50, 25),
             initial_pos=(640, 200),
+        )
+        self.circle = Circle(
+            space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 600)
         )
         self.rod = Rod(
             space=self.space,
-            mass=0.005,
+            mass=0.015,
             a=self.cart.initial_pos,
             b=self.circle.initial_pos,
             radius=2.0,

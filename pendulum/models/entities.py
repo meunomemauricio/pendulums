@@ -9,7 +9,7 @@ from pymunk import Vec2d
 class Circle:
     """Circle that sits on the end of the pendulum rod."""
 
-    ACCELERATION = 3000  # mm/s²
+    ACCELERATION = 300  # mm/s²
 
     def __init__(
         self,
@@ -32,17 +32,17 @@ class Circle:
 
         space.add(self.body, self.shape)
 
-    def accelerate(self, dir: Vec2d):
+    def accelerate(self, direction: Vec2d):
         """Apply acceleration in the direction `dir`."""
-        force = self.mass * self.ACCELERATION * dir.normalized()
-        self.body.apply_force_at_local_point(force=force)
+        impulse = self.mass * self.ACCELERATION * direction.normalized()
+        self.body.apply_impulse_at_local_point(impulse=impulse)
 
 
 class Cart:
     """Cart that carries the Pendulum."""
 
     #: Cart Acceleration
-    CART_ACCEL = 5000  # mm/s²
+    ACCELERATION = 100  # mm/s²
 
     def __init__(
         self,
@@ -65,13 +65,13 @@ class Cart:
 
     def accelerate_left(self) -> None:
         """Apply lateral acceleration to the left."""
-        force = self.mass * Vec2d(-self.CART_ACCEL, 0)
-        self.body.apply_force_at_local_point(force=force)
+        impulse = self.mass * Vec2d(-self.ACCELERATION, 0)
+        self.body.apply_impulse_at_local_point(impulse=impulse)
 
     def accelerate_right(self) -> None:
         """Apply lateral acceleration to the right."""
-        force = self.mass * Vec2d(self.CART_ACCEL, 0)
-        self.body.apply_force_at_local_point(force=force)
+        impulse = self.mass * Vec2d(self.ACCELERATION, 0)
+        self.body.apply_impulse_at_local_point(impulse=impulse)
 
 
 class Fixed:

@@ -1,9 +1,11 @@
 """Simple Example Pymunk + Pyglet Application."""
-
 import pymunk
-from pyglet import clock, text, window
+from pyglet import clock, window
 from pyglet.window import key
 from pymunk.pyglet_util import DrawOptions
+
+from pendulum import settings
+from pendulum.utils import FPSDisplay
 
 
 class Circle:
@@ -67,50 +69,23 @@ class Cart:
         self.body.apply_force_at_local_point(force=(force, 0))
 
 
-class FPSDisplay(window.FPSDisplay):
-    """Custom FPS Display."""
+class CartPendulum(window.Window):
 
-    FONT_SIZE = 12
-    FONT_COLOR = 255, 0, 0, 200
-
-    def __init__(self, window: window.Window):
-        super().__init__(window=window)
-
-        self.label = text.Label(
-            font_size=self.FONT_SIZE,
-            x=self.window.width - self.FONT_SIZE * 8,
-            y=self.window.height - self.FONT_SIZE - 1,
-            color=self.FONT_COLOR,
-            bold=True,
-        )
-
-    def set_fps(self, fps):
-        """Override FPS text."""
-        self.label.text = f"FPS: {fps:0.2f}"
-
-
-class SimulationWindow(window.Window):
-
-    WIDTH = 1280
-    HEIGHT = 720
     CAPTION = "Inverted Pendulum Simulation"
-
-    FPS_FONT_SIZE = 12
-    FPS_FONT_COLOR = 255, 0, 0, 200
 
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
-    #: Tick Interval
-    INTERVAL = 1.0 / 60
-
     def __init__(
-        self, width: int = WIDTH, height: int = HEIGHT, caption: str = CAPTION
+        self,
+        width: int = settings.WIDTH,
+        height: int = settings.HEIGHT,
+        caption: str = CAPTION,
     ):
         super().__init__(width=width, height=height, caption=caption)
 
         self.space = pymunk.Space()
-        self.space.gravity = 0, -9807  # mm/s²
+        self.space.gravity = settings.GRAVITY
 
         self._create_entities()
         self._create_constraints()

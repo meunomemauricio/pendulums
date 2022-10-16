@@ -3,6 +3,7 @@
 Entities are an abstraction comprised of a PyMunk body and shape.
 """
 import pymunk
+from pymunk import Vec2d
 
 
 class Circle:
@@ -31,15 +32,10 @@ class Circle:
 
         space.add(self.body, self.shape)
 
-    def accelerate_left(self) -> None:
-        """Apply lateral acceleration to the left."""
-        force = self.mass * self.ACCELERATION * -1
-        self.body.apply_force_at_local_point(force=(force, 0))
-
-    def accelerate_right(self) -> None:
-        """Apply lateral acceleration to the right."""
-        force = self.mass * self.ACCELERATION
-        self.body.apply_force_at_local_point(force=(force, 0))
+    def accelerate(self, dir: Vec2d):
+        """Apply acceleration in the direction `dir`."""
+        force = self.mass * self.ACCELERATION * dir.normalized()
+        self.body.apply_force_at_local_point(force=force)
 
 
 class Cart:
@@ -76,3 +72,17 @@ class Cart:
         """Apply lateral acceleration to the right."""
         force = self.mass * self.CART_ACCEL
         self.body.apply_force_at_local_point(force=(force, 0))
+
+
+class Fixed:
+    """Fixed point in the space."""
+
+    def __init__(
+        self,
+        space: pymunk.Space,
+        pos: tuple[float, float] = (0, 0),
+    ):
+        self.pos = pos
+
+        self.body: pymunk.Body = space.static_body
+        self.body.position = pos

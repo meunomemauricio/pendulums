@@ -1,4 +1,5 @@
 """Shim setup file to allow for development install."""
+# mypy: ignore-errors
 
 from setuptools import setup
 

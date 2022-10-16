@@ -129,10 +129,10 @@ class SimulationWindow(window.Window):
             space=self.space,
             mass=0.200,
             size=(50, 25),
-            initial_pos=(640, 200),
+            initial_pos=(640, 360),
         )
         self.circle = Circle(
-            space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 600)
+            space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 650)
         )
 
     def _create_constraints(self) -> None:

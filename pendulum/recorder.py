@@ -37,6 +37,10 @@ def prompt_recording(prefix: str) -> Path:
         click.secho(msg, fg="bright_red")
         raise Exit(0)
 
+    if len(recordings) == 1:
+        click.secho("Selecting only recording available.", fg="green")
+        return recordings[0]
+
     click.echo()
     click.secho(f'Available "{prefix}" recordings:', underline=True)
     for idx, rec_path in enumerate(recordings):
@@ -65,7 +69,7 @@ class Recorder:
         file_path = sett.REC_PATH / generate_filename(prefix=prefix)
         self.csv_file = file_path.open("w")
 
-        fieldnames = ["ts"]
+        fieldnames = ["ts", "interval"]
         fieldnames.extend(fields)
         self.writer = csv.DictWriter(self.csv_file, fieldnames=fieldnames)
         self.writer.writeheader()
@@ -75,7 +79,8 @@ class Recorder:
 
         Timestamp is inserted automatically.
         """
-        self.writer.writerow(dict(ts=time.time(), **kwargs))
+        row = dict(ts=time.time(), interval=sett.INTERVAL, **kwargs)
+        self.writer.writerow(row)
 
     def close(self):
         """Close file."""

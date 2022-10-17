@@ -2,6 +2,7 @@
 import click
 import pyglet
 
+from pendulum.fixed.plot import plot_recording
 from pendulum.fixed.simulator import FixedPendulum
 from pendulum.recorder import prompt_recording
 
@@ -22,4 +23,4 @@ def run():
 def plot():
     """Plot Recording data."""
     rec_path = prompt_recording(prefix="fixed")
-    print(rec_path)  # TODO: Plot selection
+    plot_recording(path=rec_path)

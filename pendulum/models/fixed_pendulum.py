@@ -8,6 +8,7 @@ from pymunk.pyglet_util import DrawOptions
 from pendulum import settings as sett
 from pendulum.models.entities import Circle, Fixed
 from pendulum.models.utils import FPSDisplay
+from pendulum.recorder import Recorder
 
 
 class FixedPendulum(window.Window):
@@ -17,6 +18,13 @@ class FixedPendulum(window.Window):
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
+    #: Recorder fields
+    REC_FIELDS = (
+        "angle",
+        "input_left",
+        "input_right",
+    )
+
     def __init__(
         self,
         width: int = sett.WIDTH,
@@ -24,6 +32,8 @@ class FixedPendulum(window.Window):
         caption: str = CAPTION,
     ):
         super().__init__(width=width, height=height, caption=caption)
+
+        self.recorder = Recorder(fields=self.REC_FIELDS, prefix="fixed")
 
         self.space = pymunk.Space()
         self.space.gravity = sett.GRAVITY
@@ -44,7 +54,6 @@ class FixedPendulum(window.Window):
         self.circle = Circle(
             space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 50)
         )
-
         self.fixed = Fixed(space=self.space, pos=(640, 360))
 
     def _create_constraints(self) -> None:
@@ -53,27 +62,36 @@ class FixedPendulum(window.Window):
             a=self.fixed.body,
             b=self.circle.body,
         )
-
         self.space.add(rod_joint)
 
     @property
-    def _rod_vector(self) -> Vec2d:
-        """Vector from the Fixed point to the center of the Circle."""
+    def angle(self):
+        """Angle between the Pendulum and the resting location."""
+        return self.vector.get_angle_degrees_between(Vec2d(0, -1))
+
+    @property
+    def vector(self) -> Vec2d:
+        """Pendulum Vector, from Fixed point to the center of the Circle."""
         return self.circle.body.position - self.fixed.body.position
 
     def _accelerate_cw(self):
         """Apply a Clockwise force to the pendulum."""
-        self.circle.accelerate(direction=self._rod_vector.rotated_degrees(-90))
+        self.circle.accelerate(direction=self.vector.rotated_degrees(-90))
 
     def _accelerate_ccw(self):
         """Apply a Counter Clockwise force to the pendulum."""
-        self.circle.accelerate(direction=self._rod_vector.rotated_degrees(90))
+        self.circle.accelerate(direction=self.vector.rotated_degrees(90))
 
     def on_draw(self) -> None:
         """Screen Draw Event."""
         self.clear()
         self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
+
+    def on_close(self):
+        """Window close event handler."""
+        self.recorder.close()
+        super().on_close()
 
     def update(self, dt: float) -> None:
         """Update PyMunk's Space state.
@@ -86,3 +104,9 @@ class FixedPendulum(window.Window):
             self._accelerate_ccw()
 
         self.space.step(sett.INTERVAL)
+
+        self.recorder.insert(
+            angle=self.angle,
+            input_left=self.keyboard[key.LEFT],
+            input_right=self.keyboard[key.RIGHT],
+        )

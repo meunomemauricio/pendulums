@@ -3,11 +3,11 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="inverted_pendulum"
+name="pendulums"
 version="0.1"
 description="Simulation of an Inverted Pendulum."
 authors=[{name="Mauricio Freitas"}]
-urls={repo="https://github.com/meunomemauricio/inverted_pendulum"}
+urls={repo="https://github.com/meunomemauricio/pendulums"}
 readme="README.md"
 license={text = "GPL-3.0-only"}
 requires-python=">=3.10"

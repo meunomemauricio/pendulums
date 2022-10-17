@@ -2,7 +2,7 @@
 import click
 import pyglet
 
-from pendulum.cart.simulator import CartPendulum
+from pendulum.cart.simulator import CartPendulumSim
 from pendulum.recorder import prompt_recording
 
 
@@ -14,7 +14,7 @@ def cart():
 @cart.command()
 def run():
     """Run the simulation."""
-    CartPendulum()
+    CartPendulumSim()
     pyglet.app.run()
 
 

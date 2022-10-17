@@ -2,41 +2,27 @@
 import pymunk
 from pyglet import clock, window
 from pyglet.window import key
+from pymunk import Vec2d
 from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
 from pendulum.munk.entities import Cart, Circle
 from pendulum.munk.utils import FPSDisplay
+from pendulum.recorder import Recorder
 
 
-class CartPendulum(window.Window):
-
-    CAPTION = "PyMunk Pendulum on a Cart Simulation"
+class CartPendulumModel:
+    """Cart Pendulum PyMunk Model."""
 
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
-    def __init__(
-        self,
-        width: int = sett.WIDTH,
-        height: int = sett.HEIGHT,
-        caption: str = CAPTION,
-    ):
-        super().__init__(width=width, height=height, caption=caption)
-
-        self.space = pymunk.Space()
-        self.space.gravity = sett.GRAVITY
+    def __init__(self, space: pymunk.Space, window: window.Window):
+        self.space = space
+        self.window = window
 
         self._create_entities()
         self._create_constraints()
-
-        self.draw_options = DrawOptions()
-        self.fps_display = FPSDisplay(window=self)
-
-        clock.schedule_interval(self.update, interval=sett.INTERVAL)
-
-        self.keyboard = key.KeyStateHandler()
-        self.push_handlers(self.keyboard)
 
     def _create_entities(self) -> None:
         """Create the entities that form the Pendulum."""
@@ -58,7 +44,7 @@ class CartPendulum(window.Window):
         )
 
         rail_x_1 = self.RAIL_OFFSET
-        rail_x_2 = self.width - self.RAIL_OFFSET
+        rail_x_2 = self.window.width - self.RAIL_OFFSET
         rail_joint = pymunk.constraints.GrooveJoint(
             a=self.space.static_body,
             b=self.cart.body,
@@ -68,6 +54,66 @@ class CartPendulum(window.Window):
         )
 
         self.space.add(rod_joint, rail_joint)
+
+    @property
+    def angle(self) -> float:
+        """Angle (deg) between the Pendulum and the resting location."""
+        return self.vector.get_angle_degrees_between(Vec2d(0, -1))
+
+    @property
+    def cart_x(self) -> float:
+        """Cart position related to the center of the rails.
+
+        Assume the rails are centered in the middle of the screen.
+        """
+        return self.cart.body.position.x - (self.window.width / 2)
+
+    @property
+    def vector(self) -> Vec2d:
+        """Pendulum Vector, from Fixed point to the center of the Cart."""
+        return self.circle.body.position - self.cart.body.position
+
+    def handle_input(self, keyboard: key.KeyStateHandler) -> None:
+        """Handle User Input."""
+        if keyboard[key.LEFT]:
+            self.cart.accelerate_left()
+        elif keyboard[key.RIGHT]:
+            self.cart.accelerate_right()
+
+
+class CartPendulumSim(window.Window):
+    """Application simulating a Cart Pendulum."""
+
+    CAPTION = "PyMunk Pendulum on a Cart Simulation"
+
+    #: Recorder fields
+    REC_FIELDS = (
+        "angle",
+        "cart_x",
+        "input_left",
+        "input_right",
+    )
+
+    def __init__(
+        self,
+        width: int = sett.WIDTH,
+        height: int = sett.HEIGHT,
+        caption: str = CAPTION,
+    ):
+        super().__init__(width=width, height=height, caption=caption)
+
+        self.space = pymunk.Space()
+        self.space.gravity = sett.GRAVITY
+
+        self.draw_options = DrawOptions()
+        self.fps_display = FPSDisplay(window=self)
+        self.keyboard = key.KeyStateHandler()
+        self.model = CartPendulumModel(space=self.space, window=self)
+        self.recorder = Recorder(fields=self.REC_FIELDS, prefix="cart")
+
+        self.push_handlers(self.keyboard)
+
+        clock.schedule_interval(self.update, interval=sett.INTERVAL)
 
     def on_draw(self) -> None:
         """Screen Draw Event."""
@@ -80,9 +126,11 @@ class CartPendulum(window.Window):
 
         :param float dt: Time between calls of `update`.
         """
-        if self.keyboard[key.LEFT]:
-            self.cart.accelerate_left()
-        elif self.keyboard[key.RIGHT]:
-            self.cart.accelerate_right()
-
+        self.model.handle_input(keyboard=self.keyboard)
         self.space.step(sett.INTERVAL)
+        self.recorder.insert(
+            angle=self.model.angle,
+            cart_x=self.model.cart_x,
+            input_left=self.keyboard[key.LEFT],
+            input_right=self.keyboard[key.RIGHT],
+        )

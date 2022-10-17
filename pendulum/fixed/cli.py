@@ -3,7 +3,7 @@ import click
 import pyglet
 
 from pendulum.fixed.plot import plot_recording
-from pendulum.fixed.simulator import FixedPendulum
+from pendulum.fixed.simulator import FixedPendulumSim
 from pendulum.recorder import prompt_recording
 
 
@@ -15,7 +15,7 @@ def fixed():
 @fixed.command()
 def run():
     """Run the simulation."""
-    FixedPendulum()
+    FixedPendulumSim()
     pyglet.app.run()
 
 

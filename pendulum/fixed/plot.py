@@ -2,6 +2,7 @@
 from pathlib import Path
 
 import pandas as pd
+from plotly import graph_objects as go
 
 
 def load_recording(path: Path) -> pd.DataFrame:
@@ -18,5 +19,7 @@ def load_recording(path: Path) -> pd.DataFrame:
 def plot_recording(path: Path) -> None:
     """Plot Recording data."""
     df = load_recording(path)
-    # TODO: Plot data.
-    print(df.head())
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df["angle"], name="Angle (deg)"))
+    fig.show()

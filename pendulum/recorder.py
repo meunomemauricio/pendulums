@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Collection
 
 import click
+from click import UsageError
+from click.exceptions import Exit
 
 from pendulum import settings as sett
 
@@ -24,6 +26,31 @@ def parse_filename(path: Path) -> datetime:
     """Parse filename into a timestamp."""
     ts = path.stem.split("_", maxsplit=1)[1]
     return datetime.strptime(ts, "%Y-%m-%d_%H:%M:%S")
+
+
+def prompt_recording(prefix: str) -> Path:
+    """Print a list of recordings and prompt user for selection."""
+    recordings = list_recordings(prefix=prefix)
+    if not recordings:
+        msg = f'There are no "{prefix}" recordings available.'
+        click.secho(msg, fg="bright_red")
+        raise Exit(0)
+
+    click.echo()
+    click.secho(f'Available "{prefix}" recordings:', underline=True)
+    for idx, rec_path in enumerate(recordings):
+        idx_str = click.style(idx, bold=True)
+        ts_str = click.style(parse_filename(path=rec_path), fg="green")
+        click.echo(f"[{idx_str}] - {ts_str}")
+
+    def value_proc(value: str) -> Path:
+        try:
+            return recordings[int(value)]
+        except (IndexError, ValueError):
+            raise UsageError(f"Invalid recording index: {value}.")
+
+    click.echo()
+    return click.prompt("Select", value_proc=value_proc)
 
 
 class Recorder:

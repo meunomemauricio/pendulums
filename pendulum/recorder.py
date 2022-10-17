@@ -38,7 +38,7 @@ def prompt_recording(prefix: str) -> Path:
         raise Exit(0)
 
     if len(recordings) == 1:
-        click.secho("Selecting only recording available.", fg="green")
+        click.secho("Selecting only recording available.", fg="yellow")
         return recordings[0]
 
     click.echo()

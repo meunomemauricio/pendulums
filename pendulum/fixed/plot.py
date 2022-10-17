@@ -1,8 +1,11 @@
 """Plot Fixed Pendulum Simulation data."""
 from pathlib import Path
 
+import click
 import pandas as pd
 from plotly import graph_objects as go
+
+from pendulum import settings
 
 
 def load_recording(path: Path) -> pd.DataFrame:
@@ -22,4 +25,6 @@ def plot_recording(path: Path) -> None:
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df["angle"], name="Angle (deg)"))
-    fig.show()
+    plot_path = settings.PLOT_PATH / f"{path.stem}.png"
+    fig.write_image(plot_path)
+    click.secho(f'Plot generated: "{plot_path.name}"', fg="green")

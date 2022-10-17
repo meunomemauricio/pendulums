@@ -27,3 +27,9 @@ if not DATA_PATH.exists():
 
 #: Recordings Path
 REC_PATH = DATA_PATH / "recordings"
+
+#: Plots Path
+PLOT_PATH = DATA_PATH / "plot"
+if not PLOT_PATH.exists():
+    click.secho("Plot path doesn't exist. Creating it.", fg="yellow")
+    PLOT_PATH.mkdir()

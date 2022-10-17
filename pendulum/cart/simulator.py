@@ -5,8 +5,8 @@ from pyglet.window import key
 from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
-from pendulum.models.entities import Cart, Circle
-from pendulum.models.utils import FPSDisplay
+from pendulum.munk.entities import Cart, Circle
+from pendulum.munk.utils import FPSDisplay
 
 
 class CartPendulum(window.Window):

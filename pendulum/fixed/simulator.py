@@ -6,8 +6,8 @@ from pymunk import Vec2d
 from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
-from pendulum.models.entities import Circle, Fixed
-from pendulum.models.utils import FPSDisplay
+from pendulum.munk.entities import Circle, Fixed
+from pendulum.munk.utils import FPSDisplay
 from pendulum.recorder import Recorder
 
 

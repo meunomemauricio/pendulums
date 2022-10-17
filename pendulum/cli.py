@@ -1,26 +1,15 @@
 """Command Line Interface for the Pendulum application."""
 
 import click
-import pyglet
 
-from pendulum.models.cart_pendulum import CartPendulum
-from pendulum.models.fixed_pendulum import FixedPendulum
+from pendulum.cart.cli import cart
+from pendulum.fixed.cli import fixed
 
 
 @click.group()
 def cli():
-    """Pendulum CLI."""
+    """Pendulum Simulator CLI."""
 
 
-@cli.command()
-def cart():
-    """Run PyMunk Cart Pendulum simulation."""
-    CartPendulum()
-    pyglet.app.run()
-
-
-@cli.command()
-def fixed():
-    """Run the PyMunk Fixed Pendulum simulation."""
-    FixedPendulum()
-    pyglet.app.run()
+cli.add_command(cart)
+cli.add_command(fixed)

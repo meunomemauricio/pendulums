@@ -20,7 +20,9 @@ def run():
 
 
 @fixed.command()
-def plot():
+@click.option("-H", "--height", type=int, default=1080, help="Plot Height.")
+@click.option("-W", "--width", type=int, default=1920, help="Plot Width.")
+def plot(height: int, width: int):
     """Plot Recording data."""
     rec_path = prompt_recording(prefix="fixed")
-    plot_recording(path=rec_path)
+    plot_recording(path=rec_path, height=height, width=width)

@@ -1,5 +1,6 @@
 """Record data from simulation."""
 import csv
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Collection
@@ -64,12 +65,17 @@ class Recorder:
         file_path = sett.REC_PATH / generate_filename(prefix=prefix)
         self.csv_file = file_path.open("w")
 
-        self.writer = csv.DictWriter(self.csv_file, fieldnames=fields)
+        fieldnames = ["ts"]
+        fieldnames.extend(fields)
+        self.writer = csv.DictWriter(self.csv_file, fieldnames=fieldnames)
         self.writer.writeheader()
 
     def insert(self, **kwargs):
-        """Insert data entry."""
-        self.writer.writerow(kwargs)
+        """Insert data entry.
+
+        Timestamp is inserted automatically.
+        """
+        self.writer.writerow(dict(ts=time.time(), **kwargs))
 
     def close(self):
         """Close file."""

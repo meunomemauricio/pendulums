@@ -55,7 +55,7 @@ def prompt_recording(prefix: str) -> Path:
             raise UsageError(f"Invalid recording index: {value}.")
 
     click.echo()
-    return click.prompt("Select", value_proc=value_proc)
+    return click.prompt("Select", value_proc=value_proc, default=0)
 
 
 class Recorder:

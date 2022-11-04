@@ -13,9 +13,10 @@ def cart():
 
 
 @cart.command()
-def run():
+@click.option("-r", "--record", is_flag=True, help="Record simulation data.")
+def run(record: bool):
     """Run the simulation."""
-    CartPendulumSim()
+    CartPendulumSim(record=record)
     pyglet.app.run()
 
 

@@ -102,11 +102,16 @@ class CartPendulumSim(window.Window):
 
     def __init__(
         self,
+        record: bool,
         width: int = sett.WIDTH,
         height: int = sett.HEIGHT,
         caption: str = CAPTION,
     ):
         super().__init__(width=width, height=height, caption=caption)
+
+        self.recorder = (
+            Recorder(fields=self.REC_FIELDS, prefix="cart") if record else None
+        )
 
         self.space = pymunk.Space()
         self.space.gravity = sett.GRAVITY
@@ -115,7 +120,6 @@ class CartPendulumSim(window.Window):
         self.fps_display = FPSDisplay(window=self)
         self.keyboard = key.KeyStateHandler()
         self.model = CartPendulumModel(space=self.space, window=self)
-        self.recorder = Recorder(fields=self.REC_FIELDS, prefix="cart")
 
         self.push_handlers(self.keyboard)
 
@@ -127,19 +131,26 @@ class CartPendulumSim(window.Window):
         self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
 
+    def on_close(self) -> None:
+        """Handle Window close event."""
+        if self.recorder:
+            self.recorder.close()
+        super().on_close()
+
     def update(self, dt: float) -> None:
         """Update PyMunk's Space state.
 
         :param float dt: Time between calls of `update`.
         """
-        self.handle_input()
+        self._handle_input()
         self.space.step(sett.INTERVAL)
-        self.recorder.insert(
-            angle=self.model.angle,
-            cart_x=self.model.cart_x,
-            input_left=self.keyboard[key.LEFT],
-            input_right=self.keyboard[key.RIGHT],
-        )
+        if self.recorder:
+            self.recorder.insert(
+                angle=self.model.angle,
+                cart_x=self.model.cart_x,
+                input_left=self.keyboard[key.LEFT],
+                input_right=self.keyboard[key.RIGHT],
+            )
 
     def _handle_input(self) -> None:
         """Handle User Input."""

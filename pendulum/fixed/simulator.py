@@ -67,11 +67,18 @@ class FixedPendulumSim(window.Window):
 
     def __init__(
         self,
+        record: bool,
         width: int = sett.WIDTH,
         height: int = sett.HEIGHT,
         caption: str = CAPTION,
     ):
         super().__init__(width=width, height=height, caption=caption)
+
+        self.recorder = (
+            Recorder(fields=self.REC_FIELDS, prefix="fixed")
+            if record
+            else None
+        )
 
         self.space = pymunk.Space()
         self.space.gravity = sett.GRAVITY
@@ -80,7 +87,6 @@ class FixedPendulumSim(window.Window):
         self.fps_display = FPSDisplay(window=self)
         self.keyboard = key.KeyStateHandler()
         self.model = FixedPendulumModel(space=self.space, window=self)
-        self.recorder = Recorder(fields=self.REC_FIELDS, prefix="fixed")
 
         self.push_handlers(self.keyboard)
 
@@ -93,8 +99,9 @@ class FixedPendulumSim(window.Window):
         self.fps_display.draw()
 
     def on_close(self) -> None:
-        """Window close event handler."""
-        self.recorder.close()
+        """Handle Window close event."""
+        if self.recorder:
+            self.recorder.close()
         super().on_close()
 
     def update(self, dt: float) -> None:
@@ -106,11 +113,12 @@ class FixedPendulumSim(window.Window):
 
         self.space.step(sett.INTERVAL)
 
-        self.recorder.insert(
-            angle=self.model.angle,
-            input_left=self.keyboard[key.LEFT],
-            input_right=self.keyboard[key.RIGHT],
-        )
+        if self.recorder is not None:
+            self.recorder.insert(
+                angle=self.model.angle,
+                input_left=self.keyboard[key.LEFT],
+                input_right=self.keyboard[key.RIGHT],
+            )
 
     def _handle_input(self, keyboard: key.KeyStateHandler) -> None:
         """Handle User Input."""

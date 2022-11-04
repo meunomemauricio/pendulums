@@ -17,6 +17,9 @@ class CartPendulumModel:
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
+    #: Cart Force
+    FORCE = 10  # mN
+
     def __init__(self, space: pymunk.Space, window: window.Window):
         self.space = space
         self.window = window
@@ -73,12 +76,15 @@ class CartPendulumModel:
         """Pendulum Vector, from Fixed point to the center of the Cart."""
         return self.circle.body.position - self.cart.body.position
 
-    def handle_input(self, keyboard: key.KeyStateHandler) -> None:
-        """Handle User Input."""
-        if keyboard[key.LEFT]:
-            self.cart.accelerate_left()
-        elif keyboard[key.RIGHT]:
-            self.cart.accelerate_right()
+    def accelerate_left(self) -> None:
+        """Apply lateral acceleration to the left."""
+        impulse = Vec2d(-self.FORCE, 0)
+        self.cart.body.apply_impulse_at_local_point(impulse=impulse)
+
+    def accelerate_right(self) -> None:
+        """Apply lateral acceleration to the right."""
+        impulse = Vec2d(self.FORCE, 0)
+        self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
 
 class CartPendulumSim(window.Window):
@@ -126,7 +132,7 @@ class CartPendulumSim(window.Window):
 
         :param float dt: Time between calls of `update`.
         """
-        self.model.handle_input(keyboard=self.keyboard)
+        self.handle_input()
         self.space.step(sett.INTERVAL)
         self.recorder.insert(
             angle=self.model.angle,
@@ -134,3 +140,10 @@ class CartPendulumSim(window.Window):
             input_left=self.keyboard[key.LEFT],
             input_right=self.keyboard[key.RIGHT],
         )
+
+    def _handle_input(self) -> None:
+        """Handle User Input."""
+        if self.keyboard[key.LEFT]:
+            self.model.accelerate_left()
+        elif self.keyboard[key.RIGHT]:
+            self.model.accelerate_right()

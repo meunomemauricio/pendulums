@@ -14,6 +14,8 @@ from pendulum.recorder import Recorder
 class FixedPendulumModel:
     """Fixed Pendulum PyMunk Model."""
 
+    FORCE = 10  # mN
+
     def __init__(self, space: pymunk.Space, window: window.Window):
         self.space = space
         self.window = window
@@ -46,20 +48,10 @@ class FixedPendulumModel:
         """Pendulum Vector, from Fixed point to the center of the Circle."""
         return self.circle.body.position - self.fixed.body.position
 
-    def _accelerate_cw(self) -> None:
-        """Apply a Clockwise force to the pendulum."""
-        self.circle.accelerate(direction=self.vector.rotated_degrees(-90))
-
-    def _accelerate_ccw(self) -> None:
-        """Apply a Counter Clockwise force to the pendulum."""
-        self.circle.accelerate(direction=self.vector.rotated_degrees(90))
-
-    def handle_input(self, keyboard: key.KeyStateHandler) -> None:
-        """Handle User Input."""
-        if keyboard[key.LEFT]:
-            self._accelerate_cw()
-        elif keyboard[key.RIGHT]:
-            self._accelerate_ccw()
+    def accelerate(self, direction: Vec2d):
+        """Apply acceleration in the direction `dir`."""
+        impulse = self.FORCE * direction.normalized()
+        self.circle.body.apply_impulse_at_local_point(impulse=impulse)
 
 
 class FixedPendulumSim(window.Window):
@@ -110,7 +102,7 @@ class FixedPendulumSim(window.Window):
 
         :param float dt: Time between calls of `update`.
         """
-        self.model.handle_input(keyboard=self.keyboard)
+        self._handle_input(keyboard=self.keyboard)
 
         self.space.step(sett.INTERVAL)
 
@@ -119,3 +111,18 @@ class FixedPendulumSim(window.Window):
             input_left=self.keyboard[key.LEFT],
             input_right=self.keyboard[key.RIGHT],
         )
+
+    def _handle_input(self, keyboard: key.KeyStateHandler) -> None:
+        """Handle User Input."""
+        if keyboard[key.LEFT]:
+            self._accelerate_cw()
+        elif keyboard[key.RIGHT]:
+            self._accelerate_ccw()
+
+    def _accelerate_cw(self) -> None:
+        """Apply a Clockwise force to the pendulum."""
+        self.model.accelerate(direction=self.model.vector.rotated_degrees(-90))
+
+    def _accelerate_ccw(self) -> None:
+        """Apply a Counter Clockwise force to the pendulum."""
+        self.model.accelerate(direction=self.model.vector.rotated_degrees(90))

@@ -2,6 +2,7 @@
 import click
 import pyglet
 
+from pendulum.cart.plot import plot_recording
 from pendulum.cart.simulator import CartPendulumSim
 from pendulum.recorder import prompt_recording
 
@@ -19,7 +20,9 @@ def run():
 
 
 @cart.command()
-def plot():
+@click.option("-H", "--height", type=int, default=1080, help="Plot Height.")
+@click.option("-W", "--width", type=int, default=1920, help="Plot Width.")
+def plot(height: int, width: int):
     """Plot Recording data."""
     rec_path = prompt_recording(prefix="cart")
-    print(rec_path)  # TODO: Plot selection
+    plot_recording(path=rec_path, height=height, width=width)

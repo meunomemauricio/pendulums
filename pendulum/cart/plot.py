@@ -1,4 +1,4 @@
-"""Plot Fixed Pendulum Simulation data."""
+"""Plot Cart Pendulum Simulation data."""
 from pathlib import Path
 
 import click
@@ -16,7 +16,7 @@ def plot_recording(path: Path, height: int, width: int) -> None:
     fig.add_trace(go.Scatter(x=df.index, y=df["angle"], name="Angle (deg)"))
     plot_path = settings.PLOT_PATH / f"{path.stem}.png"
     fig.update_layout(
-        title="Fixed Pendulum Simulation.",
+        title="Cart Pendulum Simulation.",
         autosize=False,
         width=width,
         height=height,

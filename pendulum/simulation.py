@@ -1,6 +1,7 @@
 import pymunk
-from pyglet import clock, window
-from pyglet.window import key
+from pyglet import clock, shapes, window
+from pyglet.window import key, mouse
+from pymunk import Vec2d
 from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
@@ -43,17 +44,48 @@ class BaseSimulation(window.Window):
 
         clock.schedule_interval(self.update, interval=sett.INTERVAL)
 
+        self.click_vector: Vec2d | None = None
+        self.click_line: shapes.Line | None = None
+
     def on_draw(self) -> None:
         """Screen Draw Event."""
         self.clear()
         self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
+        if self.click_line is not None:
+            self.click_line.draw()
 
     def on_close(self) -> None:
         """Handle Window close event."""
         if self.recorder:
             self.recorder.close()
         super().on_close()
+
+    def on_mouse_press(self, x, y, button, modifiers) -> None:
+        if button != mouse.LEFT:
+            return
+
+        self.click_vector = Vec2d(x=x, y=y)
+        self.click_line = shapes.Line(x, y, x, y, width=4)
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        if button != mouse.LEFT:
+            return
+
+        # diff_vector = Vec2d(x=x, y=y) - self.click_vector
+        # TODO: Spawn new circle
+        self.click_line = None
+
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        if not (buttons & mouse.LEFT):
+            return
+
+        self.click_line.position = (
+            self.click_vector.x,
+            self.click_vector.y,
+            x,
+            y,
+        )
 
     def update(self, dt: float) -> None:
         raise NotImplementedError

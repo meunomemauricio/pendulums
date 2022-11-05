@@ -26,7 +26,6 @@ class CartPendulumModel:
         self._create_constraints()
 
     def _create_entities(self) -> None:
-        """Create the entities that form the Pendulum."""
         self.cart = Cart(
             space=self.space,
             mass=0.200,
@@ -38,7 +37,6 @@ class CartPendulumModel:
         )
 
     def _create_constraints(self) -> None:
-        """Create the constraints between the Entities."""
         rod_joint = pymunk.constraints.PinJoint(
             a=self.cart.body,
             b=self.circle.body,
@@ -75,12 +73,10 @@ class CartPendulumModel:
         return self.circle.body.position - self.cart.body.position
 
     def accelerate_left(self) -> None:
-        """Apply lateral acceleration to the left."""
         impulse = Vec2d(-self.FORCE, 0)
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
     def accelerate_right(self) -> None:
-        """Apply lateral acceleration to the right."""
         impulse = Vec2d(self.FORCE, 0)
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
@@ -119,7 +115,6 @@ class CartPendulumSim(BaseSimulation):
             )
 
     def _handle_input(self) -> None:
-        """Handle User Input."""
         if self.keyboard[key.LEFT]:
             self.model.accelerate_left()
         elif self.keyboard[key.RIGHT]:

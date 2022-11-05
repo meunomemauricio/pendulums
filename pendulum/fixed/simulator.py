@@ -22,14 +22,12 @@ class FixedPendulumModel:
         self._create_constraints()
 
     def _create_entities(self) -> None:
-        """Create the entities that form the Pendulum."""
         self.circle = Circle(
             space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 50)
         )
         self.fixed = Fixed(space=self.space, pos=(640, 360))
 
     def _create_constraints(self) -> None:
-        """Create the constraints between the Entities."""
         rod_joint = pymunk.constraints.PinJoint(
             a=self.fixed.body,
             b=self.circle.body,
@@ -47,7 +45,6 @@ class FixedPendulumModel:
         return self.circle.body.position - self.fixed.body.position
 
     def accelerate(self, direction: Vec2d):
-        """Apply acceleration in the direction `dir`."""
         impulse = self.FORCE * direction.normalized()
         self.circle.body.apply_impulse_at_local_point(impulse=impulse)
 
@@ -85,16 +82,13 @@ class FixedPendulumSim(BaseSimulation):
             )
 
     def _handle_input(self, keyboard: key.KeyStateHandler) -> None:
-        """Handle User Input."""
         if keyboard[key.LEFT]:
             self._accelerate_cw()
         elif keyboard[key.RIGHT]:
             self._accelerate_ccw()
 
     def _accelerate_cw(self) -> None:
-        """Apply a Clockwise force to the pendulum."""
         self.model.accelerate(direction=self.model.vector.rotated_degrees(-90))
 
     def _accelerate_ccw(self) -> None:
-        """Apply a Counter Clockwise force to the pendulum."""
         self.model.accelerate(direction=self.model.vector.rotated_degrees(90))

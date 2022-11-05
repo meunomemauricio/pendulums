@@ -5,6 +5,7 @@ from pymunk import Vec2d
 from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
+from pendulum.munk.entities import Circle
 from pendulum.munk.utils import FPSDisplay
 from pendulum.recorder import Recorder
 
@@ -46,6 +47,7 @@ class BaseSimulation(window.Window):
 
         self.click_vector: Vec2d | None = None
         self.click_line: shapes.Line | None = None
+        self.click_circle = None
 
     def on_draw(self) -> None:
         """Screen Draw Event."""
@@ -72,8 +74,11 @@ class BaseSimulation(window.Window):
         if button != mouse.LEFT:
             return
 
-        # diff_vector = Vec2d(x=x, y=y) - self.click_vector
-        # TODO: Spawn new circle
+        diff_vector = (self.click_vector - Vec2d(x=x, y=y)) * 10
+        self.click_circle = Circle(
+            space=self.space, mass=1, radius=5, initial_pos=self.click_vector
+        )
+        self.click_circle.body.apply_impulse_at_local_point(diff_vector)
         self.click_line = None
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):

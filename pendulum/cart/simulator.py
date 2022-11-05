@@ -1,14 +1,12 @@
 """PyMunk simulation of a Pendulum attached to a moving Cart."""
 import pymunk
-from pyglet import clock, window
+from pyglet import window
 from pyglet.window import key
 from pymunk import Vec2d
-from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
 from pendulum.munk.entities import Cart, Circle
-from pendulum.munk.utils import FPSDisplay
-from pendulum.recorder import Recorder
+from pendulum.simulation import BaseSimulation
 
 
 class CartPendulumModel:
@@ -87,7 +85,7 @@ class CartPendulumModel:
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
 
-class CartPendulumSim(window.Window):
+class CartPendulumSim(BaseSimulation):
     """Application simulating a Cart Pendulum."""
 
     CAPTION = "PyMunk Pendulum on a Cart Simulation"
@@ -100,42 +98,10 @@ class CartPendulumSim(window.Window):
         "input_right",
     )
 
-    def __init__(
-        self,
-        record: bool,
-        width: int = sett.WIDTH,
-        height: int = sett.HEIGHT,
-        caption: str = CAPTION,
-    ):
-        super().__init__(width=width, height=height, caption=caption)
+    def __init__(self, record: bool):
+        super().__init__(record=record)
 
-        self.recorder = (
-            Recorder(fields=self.REC_FIELDS, prefix="cart") if record else None
-        )
-
-        self.space = pymunk.Space()
-        self.space.gravity = sett.GRAVITY
-
-        self.draw_options = DrawOptions()
-        self.fps_display = FPSDisplay(window=self)
-        self.keyboard = key.KeyStateHandler()
         self.model = CartPendulumModel(space=self.space, window=self)
-
-        self.push_handlers(self.keyboard)
-
-        clock.schedule_interval(self.update, interval=sett.INTERVAL)
-
-    def on_draw(self) -> None:
-        """Screen Draw Event."""
-        self.clear()
-        self.space.debug_draw(options=self.draw_options)
-        self.fps_display.draw()
-
-    def on_close(self) -> None:
-        """Handle Window close event."""
-        if self.recorder:
-            self.recorder.close()
-        super().on_close()
 
     def update(self, dt: float) -> None:
         """Update PyMunk's Space state.

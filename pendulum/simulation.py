@@ -13,7 +13,8 @@ from pendulum.recorder import Recorder
 class BaseSimulation(window.Window):
 
     CAPTION = "Base Simulation"
-    REC_FIELDS: tuple[str, ...] = ()
+    REC_FIELDS: tuple[str, ...]
+    REC_PREFIX: str
 
     AIM_LINE_WIDTH = 2
     PROJECTILE_SPEED = 20
@@ -31,7 +32,7 @@ class BaseSimulation(window.Window):
         super().__init__(width=width, height=height, caption=caption)
 
         self.recorder = (
-            Recorder(fields=self.REC_FIELDS, prefix="fixed")
+            Recorder(fields=self.REC_FIELDS, prefix=self.REC_PREFIX)
             if record
             else None
         )

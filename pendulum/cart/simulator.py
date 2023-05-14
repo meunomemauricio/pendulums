@@ -33,7 +33,7 @@ class CartPendulumModel:
             initial_pos=(640, 360),
         )
         self.circle = Circle(
-            space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 650)
+            space=self.space, mass=0.005, radius=10.0, initial_pos=(640, 650)
         )
 
     def _create_constraints(self) -> None:
@@ -86,7 +86,7 @@ class CartPendulumSim(BaseSimulation):
 
     CAPTION = "PyMunk Pendulum on a Cart Simulation"
 
-    #: Recorder fields
+    REC_PREFIX = "cart"
     REC_FIELDS = (
         "angle",
         "cart_x",

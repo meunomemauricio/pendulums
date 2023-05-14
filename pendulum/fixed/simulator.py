@@ -53,7 +53,7 @@ class FixedPendulumSim(BaseSimulation):
 
     CAPTION = "PyMunk Fixed Pendulum Simulation"
 
-    #: Recorder fields
+    REC_PREFIX = "fixed"
     REC_FIELDS = (
         "angle",
         "input_left",

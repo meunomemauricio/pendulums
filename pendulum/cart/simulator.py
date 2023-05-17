@@ -58,15 +58,15 @@ class CartPendulumModel:
         # Simulate linear friciton by creating a PivotJoint, disabling
         # correction and setting a maximum force. (Based on tank.py example)
         friction_joint = pymunk.PivotJoint(
-            self.space.static_body,
-            self.cart.body,
-            (0, 0), (0, 0)
+            self.space.static_body, self.cart.body, (0, 0), (0, 0)
         )
-        friction_joint.max_bias = 0 
+        friction_joint.max_bias = 0
         friction_joint.max_force = self.CART_FRICTION
 
         # Lock rotation of the cart
-        gear = pymunk.GearJoint(self.space.static_body, self.cart.body, 0.0, 1.0)
+        gear = pymunk.GearJoint(
+            self.space.static_body, self.cart.body, 0.0, 1.0
+        )
 
         self.space.add(rod_joint, rail_joint, friction_joint, gear)
 

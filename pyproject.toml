@@ -30,6 +30,11 @@ dependencies=[
     "pymunk==6.2.1",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pre-commit",
+]
+
 [project.scripts]
 pendulum="pendulum.cli:cli"
 

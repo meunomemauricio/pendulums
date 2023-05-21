@@ -78,7 +78,7 @@ class BaseSimulation(window.Window):
         if button != mouse.LEFT:
             return
 
-        diff_vector = (self.click_vector - Vec2d(x=x, y=y))
+        diff_vector = self.click_vector - Vec2d(x=x, y=y)
         impulse = diff_vector * self.PROJECTILE_SPEED
         self.click_circle = Circle(
             space=self.space, mass=1, radius=5, initial_pos=self.click_vector

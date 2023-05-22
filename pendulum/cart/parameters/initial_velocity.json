@@ -1,0 +1,9 @@
+{
+  "angle": 0,
+  "cart_x": 0,
+  "cart_v": 1000,
+  "cart_mass": 0.2,
+  "cart_size": [50.0, 25.0],
+  "circle_mass": 0.005,
+  "circle_radius": 10.0
+}

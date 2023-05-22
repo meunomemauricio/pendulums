@@ -43,6 +43,7 @@ class CartPendulumModel:
             size=self.params.cart_size,
             initial_pos=(cart_pos_x, 360),
         )
+        self.cart.body.velocity = Vec2d(self.params.cart_v, 0)
 
         mass_pos_x = cart_pos_x
         self.mass = Circle(

@@ -36,20 +36,26 @@ class CartPendulumModel:
         self._create_constraints()
 
     def _create_entities(self) -> None:
+        cart_pos_x = (self.window.width / 2) + self.initial.cart_x
         self.cart = Cart(
             space=self.space,
             mass=0.200,
             size=(50, 25),
-            initial_pos=(640, 360),
+            initial_pos=(cart_pos_x, 360),
         )
-        self.circle = Circle(
-            space=self.space, mass=0.005, radius=10.0, initial_pos=(640, 50)
+
+        mass_pos_x = cart_pos_x
+        self.mass = Circle(
+            space=self.space,
+            mass=0.005,
+            radius=10.0,
+            initial_pos=(mass_pos_x, 50),
         )
 
     def _create_constraints(self) -> None:
         rod_joint = pymunk.constraints.PinJoint(
             a=self.cart.body,
-            b=self.circle.body,
+            b=self.mass.body,
         )
 
         rail_x_1 = self.RAIL_OFFSET
@@ -103,7 +109,7 @@ class CartPendulumModel:
     @property
     def vector(self) -> Vec2d:
         """Pendulum Vector, from Fixed point to the center of the Cart."""
-        return self.circle.body.position - self.cart.body.position
+        return self.mass.body.position - self.cart.body.position
 
     def accelerate_left(self) -> None:
         impulse = Vec2d(-self.IMPULSE, 0)

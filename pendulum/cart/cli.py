@@ -2,6 +2,7 @@
 import click
 import pyglet
 
+from pendulum.cart.initial_conditions import InitialConditions
 from pendulum.cart.plot import plot_recording
 from pendulum.cart.simulator import CartPendulumSim
 from pendulum.recorder import prompt_recording
@@ -14,9 +15,17 @@ def cart():
 
 @cart.command()
 @click.option("-r", "--record", is_flag=True, help="Record simulation data.")
-def run(record: bool):
+@click.option(
+    "-i", "--initial", default="rest_bottom", help="Initial Conditions File."
+)
+def run(record: bool, initial: str | None):
     """Run the simulation."""
-    CartPendulumSim(record=record)
+    if initial:
+        initial_conditions = InitialConditions.load_from_file(filename=initial)
+    else:
+        initial_conditions = InitialConditions(0, 0, 0)
+
+    CartPendulumSim(record=record, initial=initial_conditions)
     pyglet.app.run()
 
 

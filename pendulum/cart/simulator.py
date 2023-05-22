@@ -5,6 +5,7 @@ from pyglet.window import key
 from pymunk import Vec2d
 
 from pendulum import settings as sett
+from pendulum.cart.initial_conditions import InitialConditions
 from pendulum.munk.entities import Cart, Circle
 from pendulum.simulation import BaseSimulation
 
@@ -16,14 +17,20 @@ class CartPendulumModel:
     RAIL_OFFSET = 50  # mm
 
     #: Cart Impulse
-    IMPULSE = sett.INTERVAL * 3000 # mN
+    IMPULSE = sett.INTERVAL * 3000  # mN
 
     #: Cart Friction Impulse
     CART_FRICTION = sett.INTERVAL * 60000  # mN
 
-    def __init__(self, space: pymunk.Space, window: window.Window):
+    def __init__(
+        self,
+        space: pymunk.Space,
+        window: window.Window,
+        initial: InitialConditions,
+    ):
         self.space = space
         self.window = window
+        self.initial = initial
 
         self._create_entities()
         self._create_constraints()
@@ -36,7 +43,7 @@ class CartPendulumModel:
             initial_pos=(640, 360),
         )
         self.circle = Circle(
-            space=self.space, mass=0.005, radius=10.0, initial_pos=(640, 650)
+            space=self.space, mass=0.005, radius=10.0, initial_pos=(640, 50)
         )
 
     def _create_constraints(self) -> None:
@@ -122,10 +129,12 @@ class CartPendulumSim(BaseSimulation):
         "input_right",
     )
 
-    def __init__(self, record: bool):
+    def __init__(self, record: bool, initial: InitialConditions):
         super().__init__(record=record)
 
-        self.model = CartPendulumModel(space=self.space, window=self)
+        self.model = CartPendulumModel(
+            space=self.space, window=self, initial=initial
+        )
 
     def update(self, dt: float) -> None:
         """Update PyMunk's Space state.

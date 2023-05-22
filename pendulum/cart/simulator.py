@@ -15,11 +15,11 @@ class CartPendulumModel:
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
-    #: Cart Force
-    FORCE = 50  # mN
+    #: Cart Impulse
+    IMPULSE = sett.INTERVAL * 3000 # mN
 
-    #: Cart Friction
-    CART_FRICTION = 1000
+    #: Cart Friction Impulse
+    CART_FRICTION = sett.INTERVAL * 60000  # mN
 
     def __init__(self, space: pymunk.Space, window: window.Window):
         self.space = space
@@ -57,18 +57,23 @@ class CartPendulumModel:
 
         # Simulate linear friciton by creating a PivotJoint, disabling
         # correction and setting a maximum force. (Based on tank.py example)
-        friction_joint = pymunk.PivotJoint(
+        self.friction_joint = pymunk.PivotJoint(
             self.space.static_body, self.cart.body, (0, 0), (0, 0)
         )
-        friction_joint.max_bias = 0
-        friction_joint.max_force = self.CART_FRICTION
+        self.friction_joint.max_bias = 0
+        self.friction_joint.max_force = self.CART_FRICTION
 
         # Lock rotation of the cart
         gear = pymunk.GearJoint(
             self.space.static_body, self.cart.body, 0.0, 1.0
         )
 
-        self.space.add(rod_joint, rail_joint, friction_joint, gear)
+        self.space.add(rod_joint, rail_joint, self.friction_joint, gear)
+
+    @property
+    def cart_friction(self) -> float:
+        """Friction Force applied by the joint on the cart."""
+        return self.friction_joint.impulse / sett.INTERVAL
 
     @property
     def angle(self) -> float:
@@ -84,16 +89,21 @@ class CartPendulumModel:
         return self.cart.body.position.x - (self.window.width / 2)
 
     @property
+    def cart_velocity(self) -> float:
+        """Linear Velocity of the Center of Mass of the Cart."""
+        return self.cart.body.velocity.length
+
+    @property
     def vector(self) -> Vec2d:
         """Pendulum Vector, from Fixed point to the center of the Cart."""
         return self.circle.body.position - self.cart.body.position
 
     def accelerate_left(self) -> None:
-        impulse = Vec2d(-self.FORCE, 0)
+        impulse = Vec2d(-self.IMPULSE, 0)
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
     def accelerate_right(self) -> None:
-        impulse = Vec2d(self.FORCE, 0)
+        impulse = Vec2d(self.IMPULSE, 0)
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
 
@@ -105,7 +115,9 @@ class CartPendulumSim(BaseSimulation):
     REC_PREFIX = "cart"
     REC_FIELDS = (
         "angle",
+        "cart_friction",
         "cart_x",
+        "cart_velocity",
         "input_left",
         "input_right",
     )
@@ -125,6 +137,8 @@ class CartPendulumSim(BaseSimulation):
         if self.recorder:
             self.recorder.insert(
                 angle=self.model.angle,
+                cart_friction=self.model.cart_friction,
+                cart_velocity=self.model.cart_velocity,
                 cart_x=self.model.cart_x,
                 input_left=self.keyboard[key.LEFT],
                 input_right=self.keyboard[key.RIGHT],

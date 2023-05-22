@@ -31,7 +31,7 @@ def parse_filename(path: Path) -> datetime:
 
 def prompt_recording(prefix: str) -> Path:
     """Print a list of recordings and prompt user for selection."""
-    recordings = list_recordings(prefix=prefix)
+    recordings = sorted(list_recordings(prefix=prefix), reverse=True)
     if not recordings:
         msg = f'There are no "{prefix}" recordings available.'
         click.secho(msg, fg="bright_red")

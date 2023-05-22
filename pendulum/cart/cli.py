@@ -18,12 +18,15 @@ def cart():
 @click.option(
     "-i", "--initial", default="rest_bottom", help="Initial Conditions File."
 )
-def run(record: bool, initial: str | None):
+def run(record: bool, initial: str):
     """Run the simulation."""
-    if initial:
+    try:
         initial_conditions = InitialConditions.load_from_file(filename=initial)
-    else:
-        initial_conditions = InitialConditions(0, 0, 0)
+    except FileNotFoundError:
+        click.secho(
+            f"Initial Conditions file '{initial}' not found.", fg="bright_red"
+        )
+        return
 
     CartPendulumSim(record=record, initial=initial_conditions)
     pyglet.app.run()

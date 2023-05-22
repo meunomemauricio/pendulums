@@ -46,7 +46,7 @@ class CartPendulumModel:
         )
         self.cart.body.velocity = Vec2d(self.params.cart_v, 0)
 
-        self.mass = Circle(
+        self.circle = Circle(
             space=self.space,
             mass=self.params.circle_mass,
             radius=self.params.circle_radius,
@@ -60,7 +60,7 @@ class CartPendulumModel:
     def _create_constraints(self) -> None:
         rod_joint = pymunk.constraints.PinJoint(
             a=self.cart.body,
-            b=self.mass.body,
+            b=self.circle.body,
         )
 
         rail_x_1 = self.RAIL_OFFSET
@@ -114,7 +114,7 @@ class CartPendulumModel:
     @property
     def vector(self) -> Vec2d:
         """Pendulum Vector, from Fixed point to the center of the Cart."""
-        return self.mass.body.position - self.cart.body.position
+        return self.circle.body.position - self.cart.body.position
 
     def accelerate_left(self) -> None:
         impulse = Vec2d(-self.IMPULSE, 0)

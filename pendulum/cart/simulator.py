@@ -5,7 +5,7 @@ from pyglet.window import key
 from pymunk import Vec2d
 
 from pendulum import settings as sett
-from pendulum.cart.initial_conditions import InitialConditions
+from pendulum.cart.parameters import Parameters
 from pendulum.munk.entities import Cart, Circle
 from pendulum.simulation import BaseSimulation
 
@@ -26,29 +26,29 @@ class CartPendulumModel:
         self,
         space: pymunk.Space,
         window: window.Window,
-        initial: InitialConditions,
+        params: Parameters,
     ):
         self.space = space
         self.window = window
-        self.initial = initial
+        self.params = params
 
         self._create_entities()
         self._create_constraints()
 
     def _create_entities(self) -> None:
-        cart_pos_x = (self.window.width / 2) + self.initial.cart_x
+        cart_pos_x = (self.window.width / 2) + self.params.cart_x
         self.cart = Cart(
             space=self.space,
-            mass=0.200,
-            size=(50, 25),
+            mass=self.params.cart_mass,
+            size=self.params.cart_size,
             initial_pos=(cart_pos_x, 360),
         )
 
         mass_pos_x = cart_pos_x
         self.mass = Circle(
             space=self.space,
-            mass=0.005,
-            radius=10.0,
+            mass=self.params.circle_mass,
+            radius=self.params.circle_radius,
             initial_pos=(mass_pos_x, 50),
         )
 
@@ -135,11 +135,11 @@ class CartPendulumSim(BaseSimulation):
         "input_right",
     )
 
-    def __init__(self, record: bool, initial: InitialConditions):
+    def __init__(self, record: bool, params: Parameters):
         super().__init__(record=record)
 
         self.model = CartPendulumModel(
-            space=self.space, window=self, initial=initial
+            space=self.space, window=self, params=params
         )
 
     def update(self, dt: float) -> None:

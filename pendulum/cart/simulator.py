@@ -37,21 +37,25 @@ class CartPendulumModel:
 
     def _create_entities(self) -> None:
         cart_pos_x = (self.window.width / 2) + self.params.cart_x
+        cart_pos = Vec2d(cart_pos_x, 360)
         self.cart = Cart(
             space=self.space,
             mass=self.params.cart_mass,
             size=self.params.cart_size,
-            initial_pos=(cart_pos_x, 360),
+            initial_pos=cart_pos,
         )
         self.cart.body.velocity = Vec2d(self.params.cart_v, 0)
 
-        mass_pos_x = cart_pos_x
         self.mass = Circle(
             space=self.space,
             mass=self.params.circle_mass,
             radius=self.params.circle_radius,
-            initial_pos=(mass_pos_x, 50),
+            initial_pos=self._get_circle_initial_pos(cart_pos=cart_pos),
         )
+
+    def _get_circle_initial_pos(self, cart_pos: Vec2d) -> Vec2d:
+        resting_pendulum = Vec2d(0, -self.params.circle_length)
+        return cart_pos + resting_pendulum.rotated_degrees(self.params.angle)
 
     def _create_constraints(self) -> None:
         rod_joint = pymunk.constraints.PinJoint(

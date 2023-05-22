@@ -19,6 +19,7 @@ class Parameters:
     cart_mass: float
     cart_size: tuple[float, float]
 
+    circle_length: float
     circle_mass: float
     circle_radius: float
 
@@ -34,6 +35,7 @@ class Parameters:
             cart_v=parameters["cart_v"],
             cart_mass=parameters["cart_mass"],
             cart_size=parameters["cart_size"],
+            circle_length=parameters["circle_length"],
             circle_mass=parameters["circle_mass"],
             circle_radius=parameters["circle_radius"],
         )

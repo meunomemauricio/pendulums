@@ -5,6 +5,7 @@ from pyglet.window import key
 from pymunk import Vec2d
 
 from pendulum import settings as sett
+from pendulum.cart.parameters import Parameters
 from pendulum.munk.entities import Cart, Circle
 from pendulum.simulation import BaseSimulation
 
@@ -15,29 +16,46 @@ class CartPendulumModel:
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
 
-    #: Cart Force
-    FORCE = 50  # mN
+    #: Cart Impulse
+    IMPULSE = sett.INTERVAL * 3000  # mN
 
-    #: Cart Friction
-    CART_FRICTION = 1000
+    #: Cart Friction Impulse
+    CART_FRICTION = sett.INTERVAL * 60000  # mN
 
-    def __init__(self, space: pymunk.Space, window: window.Window):
+    def __init__(
+        self,
+        space: pymunk.Space,
+        window: window.Window,
+        params: Parameters,
+    ):
         self.space = space
         self.window = window
+        self.params = params
 
         self._create_entities()
         self._create_constraints()
 
     def _create_entities(self) -> None:
+        cart_pos_x = (self.window.width / 2) + self.params.cart_x
+        cart_pos = Vec2d(cart_pos_x, 360)
         self.cart = Cart(
             space=self.space,
-            mass=0.200,
-            size=(50, 25),
-            initial_pos=(640, 360),
+            mass=self.params.cart_mass,
+            size=self.params.cart_size,
+            initial_pos=cart_pos,
         )
+        self.cart.body.velocity = Vec2d(self.params.cart_v, 0)
+
         self.circle = Circle(
-            space=self.space, mass=0.005, radius=10.0, initial_pos=(640, 650)
+            space=self.space,
+            mass=self.params.circle_mass,
+            radius=self.params.circle_radius,
+            initial_pos=self._get_circle_initial_pos(cart_pos=cart_pos),
         )
+
+    def _get_circle_initial_pos(self, cart_pos: Vec2d) -> Vec2d:
+        resting_pendulum = Vec2d(0, -self.params.circle_length)
+        return cart_pos + resting_pendulum.rotated_degrees(self.params.angle)
 
     def _create_constraints(self) -> None:
         rod_joint = pymunk.constraints.PinJoint(
@@ -57,18 +75,23 @@ class CartPendulumModel:
 
         # Simulate linear friciton by creating a PivotJoint, disabling
         # correction and setting a maximum force. (Based on tank.py example)
-        friction_joint = pymunk.PivotJoint(
+        self.friction_joint = pymunk.PivotJoint(
             self.space.static_body, self.cart.body, (0, 0), (0, 0)
         )
-        friction_joint.max_bias = 0
-        friction_joint.max_force = self.CART_FRICTION
+        self.friction_joint.max_bias = 0
+        self.friction_joint.max_force = self.CART_FRICTION
 
         # Lock rotation of the cart
         gear = pymunk.GearJoint(
             self.space.static_body, self.cart.body, 0.0, 1.0
         )
 
-        self.space.add(rod_joint, rail_joint, friction_joint, gear)
+        self.space.add(rod_joint, rail_joint, self.friction_joint, gear)
+
+    @property
+    def cart_friction(self) -> float:
+        """Friction Force applied by the joint on the cart."""
+        return self.friction_joint.impulse / sett.INTERVAL
 
     @property
     def angle(self) -> float:
@@ -84,16 +107,21 @@ class CartPendulumModel:
         return self.cart.body.position.x - (self.window.width / 2)
 
     @property
+    def cart_velocity(self) -> float:
+        """Linear Velocity of the Center of Mass of the Cart."""
+        return self.cart.body.velocity.length
+
+    @property
     def vector(self) -> Vec2d:
         """Pendulum Vector, from Fixed point to the center of the Cart."""
         return self.circle.body.position - self.cart.body.position
 
     def accelerate_left(self) -> None:
-        impulse = Vec2d(-self.FORCE, 0)
+        impulse = Vec2d(-self.IMPULSE, 0)
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
     def accelerate_right(self) -> None:
-        impulse = Vec2d(self.FORCE, 0)
+        impulse = Vec2d(self.IMPULSE, 0)
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
 
@@ -105,15 +133,19 @@ class CartPendulumSim(BaseSimulation):
     REC_PREFIX = "cart"
     REC_FIELDS = (
         "angle",
+        "cart_friction",
         "cart_x",
+        "cart_velocity",
         "input_left",
         "input_right",
     )
 
-    def __init__(self, record: bool):
+    def __init__(self, record: bool, params: Parameters):
         super().__init__(record=record)
 
-        self.model = CartPendulumModel(space=self.space, window=self)
+        self.model = CartPendulumModel(
+            space=self.space, window=self, params=params
+        )
 
     def update(self, dt: float) -> None:
         """Update PyMunk's Space state.
@@ -125,6 +157,8 @@ class CartPendulumSim(BaseSimulation):
         if self.recorder:
             self.recorder.insert(
                 angle=self.model.angle,
+                cart_friction=self.model.cart_friction,
+                cart_velocity=self.model.cart_velocity,
                 cart_x=self.model.cart_x,
                 input_left=self.keyboard[key.LEFT],
                 input_right=self.keyboard[key.RIGHT],

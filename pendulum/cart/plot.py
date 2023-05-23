@@ -13,7 +13,7 @@ def plot_recording(path: Path, height: int, width: int) -> None:
     """Plot Recording data."""
     df = load_recording(path)
 
-    fig = make_subplots(rows=2, cols=1)
+    fig = make_subplots(rows=4, cols=1)
 
     fig.add_trace(
         go.Scatter(x=df.index, y=df["angle"], name="Angle (deg)"),
@@ -21,8 +21,18 @@ def plot_recording(path: Path, height: int, width: int) -> None:
         col=1,
     )
     fig.add_trace(
-        go.Scatter(x=df.index, y=df["cart_x"], name="Cart Position"),
+        go.Scatter(x=df.index, y=df["cart_x"], name="Cart Position (mm)"),
         row=2,
+        col=1,
+    )
+    fig.add_trace(
+        go.Scatter(x=df.index, y=df["cart_velocity"], name="Cart Velocity (mm/s)"),
+        row=3,
+        col=1,
+    )
+    fig.add_trace(
+        go.Scatter(x=df.index, y=df["cart_friction"], name="Cart Friction (mN)"),
+        row=4,
         col=1,
     )
 

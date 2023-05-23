@@ -13,7 +13,7 @@ class Circle:
         space: pymunk.Space,
         mass: float,
         radius: float,
-        initial_pos: tuple[float, float] = (0, 0),
+        initial_pos: pymunk.Vec2d = pymunk.Vec2d(0, 0),
     ):
         self.mass = mass
         self.radius = radius
@@ -38,7 +38,7 @@ class Cart:
         space: pymunk.Space,
         mass: float,
         size: tuple[float, float],
-        initial_pos: tuple[float, float] = (0, 0),
+        initial_pos: pymunk.Vec2d = pymunk.Vec2d(0, 0),
     ):
         self.mass = mass
         self.size = size

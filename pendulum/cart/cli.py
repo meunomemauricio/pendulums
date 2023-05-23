@@ -2,6 +2,7 @@
 import click
 import pyglet
 
+from pendulum.cart.parameters import Parameters
 from pendulum.cart.plot import plot_recording
 from pendulum.cart.simulator import CartPendulumSim
 from pendulum.recorder import prompt_recording
@@ -14,9 +15,16 @@ def cart():
 
 @cart.command()
 @click.option("-r", "--record", is_flag=True, help="Record simulation data.")
-def run(record: bool):
+@click.option("-p", "--params", default="rest_bottom", help="Parameters File.")
+def run(record: bool, params: str):
     """Run the simulation."""
-    CartPendulumSim(record=record)
+    try:
+        sim_params = Parameters.load_from_file(filename=params)
+    except FileNotFoundError:
+        click.secho(f"Parameters '{params}' not found.", fg="bright_red")
+        return
+
+    CartPendulumSim(record=record, params=sim_params)
     pyglet.app.run()
 
 

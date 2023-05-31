@@ -30,6 +30,7 @@ dependencies=[
     "plotly==5.10.0",
     "pyglet==1.5.27",
     "pymunk==6.2.1",
+    "sympy==1.12",
 ]
 
 [project.optional-dependencies]

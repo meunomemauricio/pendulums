@@ -23,6 +23,8 @@ classifiers = [
 ]
 dependencies=[
     "Click==8.1.3",
+    "jupyterlab-vim==0.16.0",
+    "jupyterlab==4.0.1",
     "kaleido==0.2.1",
     "pandas==1.5.0",
     "plotly==5.10.0",

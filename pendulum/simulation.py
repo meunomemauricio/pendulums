@@ -53,11 +53,19 @@ class BaseSimulation(window.Window):
         self.click_line: shapes.Line | None = None
         self.click_circle = None
 
+        # TODO: Draw grid
+        x = self.width / 2
+        y1 = 0
+        y2 = self.height
+        self.y_axis_line = shapes.Line(x, y1, x, y2, width=1)
+        self.y_axis_line.opacity = 50
+
     def on_draw(self) -> None:
         """Screen Draw Event."""
         self.clear()
         self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
+        self.y_axis_line.draw()
         if self.click_line is not None:
             self.click_line.draw()
 

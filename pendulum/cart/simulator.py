@@ -19,9 +19,6 @@ class CartPendulumModel:
     #: Cart Impulse
     IMPULSE = sett.INTERVAL * 3000  # mN
 
-    #: Cart Friction Impulse
-    CART_FRICTION = sett.INTERVAL * 60000  # mN
-
     def __init__(
         self,
         space: pymunk.Space,
@@ -34,6 +31,8 @@ class CartPendulumModel:
 
         self._create_entities()
         self._create_constraints()
+
+        self._last_angle = self.params.angle
 
     def _create_entities(self) -> None:
         cart_pos_x = (self.window.width / 2) + self.params.cart_x
@@ -73,30 +72,42 @@ class CartPendulumModel:
             anchor_b=(0, 0),
         )
 
-        # Simulate linear friciton by creating a PivotJoint, disabling
-        # correction and setting a maximum force. (Based on tank.py example)
-        self.friction_joint = pymunk.PivotJoint(
-            self.space.static_body, self.cart.body, (0, 0), (0, 0)
-        )
-        self.friction_joint.max_bias = 0
-        self.friction_joint.max_force = self.CART_FRICTION
-
         # Lock rotation of the cart
         gear = pymunk.GearJoint(
             self.space.static_body, self.cart.body, 0.0, 1.0
         )
+        self.space.add(rod_joint, rail_joint, gear)
 
-        self.space.add(rod_joint, rail_joint, self.friction_joint, gear)
+        # Simulate linear friciton by creating a PivotJoint, disabling
+        # correction and setting a maximum force. (Based on tank.py example)
+        if self.params.cart_friction:
+            self.friction_joint = pymunk.PivotJoint(
+                self.space.static_body, self.cart.body, (0, 0), (0, 0)
+            )
+            self.friction_joint.max_bias = 0
+            self.friction_joint.max_force = self.params.cart_friction
+
+            self.space.add(self.friction_joint)
 
     @property
     def cart_friction(self) -> float:
         """Friction Force applied by the joint on the cart."""
+        if not self.params.cart_friction:
+            return 0.0
+
         return self.friction_joint.impulse / sett.INTERVAL
 
     @property
     def angle(self) -> float:
         """Angle (deg) between the Pendulum and the resting location."""
-        return self.vector.get_angle_degrees_between(Vec2d(0, -1))
+        return -self.vector.get_angle_degrees_between(Vec2d(0, -1))
+
+    @property
+    def angular_velocity(self) -> float:
+        """Pendulum Angular Velocity (dev/s)."""
+        ang_vel = self.angle - self._last_angle
+        self._last_angle = self.angle
+        return ang_vel
 
     @property
     def cart_x(self) -> float:
@@ -108,8 +119,8 @@ class CartPendulumModel:
 
     @property
     def cart_velocity(self) -> float:
-        """Linear Velocity of the Center of Mass of the Cart."""
-        return self.cart.body.velocity.length
+        """Linear Velocity of the Center of Mass of the Cart in the X axis."""
+        return self.cart.body.velocity.dot(Vec2d(1, 0))
 
     @property
     def vector(self) -> Vec2d:
@@ -133,6 +144,7 @@ class CartPendulumSim(BaseSimulation):
     REC_PREFIX = "cart"
     REC_FIELDS = (
         "angle",
+        "angular_velocity",
         "cart_friction",
         "cart_x",
         "cart_velocity",
@@ -157,6 +169,7 @@ class CartPendulumSim(BaseSimulation):
         if self.recorder:
             self.recorder.insert(
                 angle=self.model.angle,
+                angular_velocity=self.model.angular_velocity,
                 cart_friction=self.model.cart_friction,
                 cart_velocity=self.model.cart_velocity,
                 cart_x=self.model.cart_x,

@@ -16,6 +16,7 @@ class Parameters:
     cart_v: float
 
     # Entity Properties
+    cart_friction: float | None  # mN
     cart_mass: float
     cart_size: tuple[float, float]
 
@@ -33,6 +34,7 @@ class Parameters:
             angle=parameters["angle"],
             cart_x=parameters["cart_x"],
             cart_v=parameters["cart_v"],
+            cart_friction=parameters["cart_friction"],
             cart_mass=parameters["cart_mass"],
             cart_size=parameters["cart_size"],
             circle_length=parameters["circle_length"],

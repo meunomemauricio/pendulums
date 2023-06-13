@@ -37,8 +37,9 @@ class GridDisplay:
         x = self.window.width / 2
         y1 = 0
         y2 = self.window.height
-        y_axis_line = shapes.Line(x, y1, x, y2, width=1, batch=self._batch)
-        y_axis_line.opacity = 50
+        y_axis_line = shapes.Line(
+            x, y1, x, y2, width=1, color=(255, 255, 255, 50), batch=self._batch
+        )
 
         self._lines.append(y_axis_line)
 

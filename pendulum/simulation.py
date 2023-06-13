@@ -92,14 +92,8 @@ class BaseSimulation(window.Window):
         if not (buttons & mouse.LEFT):
             return
 
-        drag_vector = Vec2d(x, y)
-        opposite_vector = 2 * self.click_vector - drag_vector
-        self.click_line.position = (
-            x,
-            y,
-            opposite_vector.x,
-            opposite_vector.y,
-        )
+        self.click_line.anchor_position = (0, 0)
+        self.click_line.position = (x, y)
 
     def update(self, dt: float) -> None:
         raise NotImplementedError

@@ -1,5 +1,5 @@
 """Utility Functions and Classes."""
-from pyglet import text, window
+from pyglet import graphics, shapes, text, window
 
 
 class FPSDisplay(window.FPSDisplay):
@@ -18,3 +18,30 @@ class FPSDisplay(window.FPSDisplay):
             color=self.FONT_COLOR,
             bold=True,
         )
+
+
+class GridDisplay:
+    """Draw a grid on the screen."""
+
+    def __init__(self, window: window.Window):
+        self.window = window
+
+        self.enabled = True
+
+        self._lines: list[shapes.ShapeBase] = []
+        self._batch = graphics.Batch()
+        self._create_grid()
+
+    def _create_grid(self) -> None:
+        """Define the Grid Lines."""
+        x = self.window.width / 2
+        y1 = 0
+        y2 = self.window.height
+        y_axis_line = shapes.Line(x, y1, x, y2, width=1, batch=self._batch)
+        y_axis_line.opacity = 50
+
+        self._lines.append(y_axis_line)
+
+    def draw(self) -> None:
+        if self.enabled:
+            self._batch.draw()

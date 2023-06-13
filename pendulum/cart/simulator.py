@@ -32,7 +32,7 @@ class CartPendulumModel:
         self._create_entities()
         self._create_constraints()
 
-        self._last_angle = 0.0
+        self._last_angle = self.params.angle
 
     def _create_entities(self) -> None:
         cart_pos_x = (self.window.width / 2) + self.params.cart_x
@@ -100,12 +100,14 @@ class CartPendulumModel:
     @property
     def angle(self) -> float:
         """Angle (deg) between the Pendulum and the resting location."""
-        return self.vector.get_angle_degrees_between(Vec2d(0, -1))
+        return -self.vector.get_angle_degrees_between(Vec2d(0, -1))
 
     @property
     def angular_velocity(self) -> float:
         """Pendulum Angular Velocity (dev/s)."""
-        return (self.angle - self._last_angle) * sett.INTERVAL
+        ang_vel = self.angle - self._last_angle
+        self._last_angle = self.angle
+        return ang_vel
 
     @property
     def cart_x(self) -> float:

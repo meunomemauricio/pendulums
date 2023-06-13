@@ -6,7 +6,7 @@ from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
 from pendulum.munk.entities import Circle
-from pendulum.munk.utils import FPSDisplay
+from pendulum.munk.utils import FPSDisplay, GridDisplay
 from pendulum.recorder import Recorder
 
 
@@ -43,6 +43,7 @@ class BaseSimulation(window.Window):
         self.draw_options = DrawOptions()
 
         self.fps_display = FPSDisplay(window=self)
+        self.grid = GridDisplay(window=self)
 
         self.keyboard = key.KeyStateHandler()
         self.push_handlers(self.keyboard)
@@ -53,19 +54,12 @@ class BaseSimulation(window.Window):
         self.click_line: shapes.Line | None = None
         self.click_circle = None
 
-        # TODO: Draw grid
-        x = self.width / 2
-        y1 = 0
-        y2 = self.height
-        self.y_axis_line = shapes.Line(x, y1, x, y2, width=1)
-        self.y_axis_line.opacity = 50
-
     def on_draw(self) -> None:
         """Screen Draw Event."""
         self.clear()
         self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
-        self.y_axis_line.draw()
+        self.grid.draw()
         if self.click_line is not None:
             self.click_line.draw()
 
@@ -98,14 +92,13 @@ class BaseSimulation(window.Window):
         if not (buttons & mouse.LEFT):
             return
 
-        drag_vector = Vec2d(x, y)
-        opposite_vector = 2 * self.click_vector - drag_vector
-        self.click_line.position = (
-            x,
-            y,
-            opposite_vector.x,
-            opposite_vector.y,
-        )
+        # FIXME: Line is a little janky
+        self.click_line.anchor_position = (0, 0)
+        self.click_line.position = (x, y)
+
+    def on_key_release(self, symbol, modifiers):
+        if symbol == key.G:
+            self.grid.toggle()
 
     def update(self, dt: float) -> None:
         raise NotImplementedError

@@ -19,9 +19,6 @@ class CartPendulumModel:
     #: Cart Impulse
     IMPULSE = sett.INTERVAL * 3000  # mN
 
-    #: Cart Friction Impulse
-    CART_FRICTION = sett.INTERVAL * 60000  # mN
-
     def __init__(
         self,
         space: pymunk.Space,
@@ -73,24 +70,29 @@ class CartPendulumModel:
             anchor_b=(0, 0),
         )
 
-        # Simulate linear friciton by creating a PivotJoint, disabling
-        # correction and setting a maximum force. (Based on tank.py example)
-        self.friction_joint = pymunk.PivotJoint(
-            self.space.static_body, self.cart.body, (0, 0), (0, 0)
-        )
-        self.friction_joint.max_bias = 0
-        self.friction_joint.max_force = self.CART_FRICTION
-
         # Lock rotation of the cart
         gear = pymunk.GearJoint(
             self.space.static_body, self.cart.body, 0.0, 1.0
         )
+        self.space.add(rod_joint, rail_joint, gear)
 
-        self.space.add(rod_joint, rail_joint, self.friction_joint, gear)
+        # Simulate linear friciton by creating a PivotJoint, disabling
+        # correction and setting a maximum force. (Based on tank.py example)
+        if self.params.cart_friction:
+            self.friction_joint = pymunk.PivotJoint(
+                self.space.static_body, self.cart.body, (0, 0), (0, 0)
+            )
+            self.friction_joint.max_bias = 0
+            self.friction_joint.max_force = self.params.cart_friction
+
+            self.space.add(self.friction_joint)
 
     @property
     def cart_friction(self) -> float:
         """Friction Force applied by the joint on the cart."""
+        if not self.params.cart_friction:
+            return 0.0
+
         return self.friction_joint.impulse / sett.INTERVAL
 
     @property

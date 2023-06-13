@@ -85,7 +85,9 @@ class CartPendulumModel:
                 self.space.static_body, self.cart.body, (0, 0), (0, 0)
             )
             self.friction_joint.max_bias = 0
-            self.friction_joint.max_force = self.params.cart_friction
+            self.friction_joint.max_force = (
+                self.params.cart_friction * sett.INTERVAL
+            )
 
             self.space.add(self.friction_joint)
 

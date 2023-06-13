@@ -92,6 +92,7 @@ class BaseSimulation(window.Window):
         if not (buttons & mouse.LEFT):
             return
 
+        # FIXME: Line is a little janky
         self.click_line.anchor_position = (0, 0)
         self.click_line.position = (x, y)
 

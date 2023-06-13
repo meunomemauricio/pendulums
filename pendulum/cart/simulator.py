@@ -32,6 +32,8 @@ class CartPendulumModel:
         self._create_entities()
         self._create_constraints()
 
+        self._last_angle = 0.0
+
     def _create_entities(self) -> None:
         cart_pos_x = (self.window.width / 2) + self.params.cart_x
         cart_pos = Vec2d(cart_pos_x, 360)
@@ -101,6 +103,11 @@ class CartPendulumModel:
         return self.vector.get_angle_degrees_between(Vec2d(0, -1))
 
     @property
+    def angular_velocity(self) -> float:
+        """Pendulum Angular Velocity (dev/s)."""
+        return (self.angle - self._last_angle) * sett.INTERVAL
+
+    @property
     def cart_x(self) -> float:
         """Cart position related to the center of the rails.
 
@@ -110,8 +117,8 @@ class CartPendulumModel:
 
     @property
     def cart_velocity(self) -> float:
-        """Linear Velocity of the Center of Mass of the Cart."""
-        return self.cart.body.velocity.length
+        """Linear Velocity of the Center of Mass of the Cart in the X axis."""
+        return self.cart.body.velocity.dot(Vec2d(1, 0))
 
     @property
     def vector(self) -> Vec2d:
@@ -135,6 +142,7 @@ class CartPendulumSim(BaseSimulation):
     REC_PREFIX = "cart"
     REC_FIELDS = (
         "angle",
+        "angular_velocity",
         "cart_friction",
         "cart_x",
         "cart_velocity",
@@ -159,6 +167,7 @@ class CartPendulumSim(BaseSimulation):
         if self.recorder:
             self.recorder.insert(
                 angle=self.model.angle,
+                angular_velocity=self.model.angular_velocity,
                 cart_friction=self.model.cart_friction,
                 cart_velocity=self.model.cart_velocity,
                 cart_x=self.model.cart_x,

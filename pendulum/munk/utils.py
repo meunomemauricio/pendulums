@@ -90,3 +90,6 @@ class GridDisplay:
     def draw(self) -> None:
         if self.enabled:
             self._batch.draw()
+
+    def toggle(self) -> None:
+        self.enabled = not self.enabled

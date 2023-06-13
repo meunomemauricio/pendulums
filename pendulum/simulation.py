@@ -96,5 +96,9 @@ class BaseSimulation(window.Window):
         self.click_line.anchor_position = (0, 0)
         self.click_line.position = (x, y)
 
+    def on_key_release(self, symbol, modifiers):
+        if symbol == key.G:
+            self.grid.toggle()
+
     def update(self, dt: float) -> None:
         raise NotImplementedError

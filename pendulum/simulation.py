@@ -1,11 +1,10 @@
 import pymunk
-from pyglet import clock, shapes, window
+from pyglet import clock, window
 from pyglet.window import key, mouse
-from pymunk import Vec2d
 from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
-from pendulum.munk.entities import Circle
+from pendulum.projectile import Projectile
 from pendulum.recorder import Recorder
 from pendulum.utils import FPSDisplay, GridDisplay
 
@@ -15,9 +14,6 @@ class BaseSimulation(window.Window):
     CAPTION = "Base Simulation"
     REC_FIELDS: tuple[str, ...]
     REC_PREFIX: str
-
-    AIM_LINE_WIDTH = 2
-    PROJECTILE_SPEED = 20
 
     def __init__(
         self,
@@ -45,14 +41,12 @@ class BaseSimulation(window.Window):
         self.fps_display = FPSDisplay(window=self)
         self.grid = GridDisplay(window=self)
 
+        self.projectile = Projectile(space=self.space)
+
         self.keyboard = key.KeyStateHandler()
         self.push_handlers(self.keyboard)
 
         clock.schedule_interval(self.update, interval=sett.INTERVAL)
-
-        self.click_vector: Vec2d | None = None
-        self.click_line: shapes.Line | None = None
-        self.click_circle = None
 
     def on_draw(self) -> None:
         """Screen Draw Event."""
@@ -60,8 +54,7 @@ class BaseSimulation(window.Window):
         self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
         self.grid.draw()
-        if self.click_line is not None:
-            self.click_line.draw()
+        self.projectile.draw()
 
     def on_close(self) -> None:
         """Handle Window close event."""
@@ -73,32 +66,24 @@ class BaseSimulation(window.Window):
         if button != mouse.LEFT:
             return
 
-        self.click_vector = Vec2d(x=x, y=y)
-        self.click_line = shapes.Line(x, y, x, y, width=self.AIM_LINE_WIDTH)
+        self.projectile.start(x=x, y=y)
 
     def on_mouse_release(self, x, y, button, modifiers):
         if button != mouse.LEFT:
             return
 
-        diff_vector = self.click_vector - Vec2d(x=x, y=y)
-        impulse = diff_vector * self.PROJECTILE_SPEED
-        self.click_circle = Circle(
-            space=self.space, mass=1, radius=5, initial_pos=self.click_vector
-        )
-        self.click_circle.body.apply_impulse_at_local_point(impulse)
-        self.click_line = None
+        self.projectile.fire(x=x, y=y)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if not (buttons & mouse.LEFT):
             return
 
-        # FIXME: Line is a little janky
-        self.click_line.anchor_position = (0, 0)
-        self.click_line.position = (x, y)
+        self.projectile.update_aim(x=x, y=y)
 
     def on_key_release(self, symbol, modifiers):
         if symbol == key.G:
             self.grid.toggle()
 
     def update(self, dt: float) -> None:
+        """Update the Simulation."""
         raise NotImplementedError

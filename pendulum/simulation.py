@@ -4,7 +4,7 @@ from pyglet.window import key, mouse
 from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
-from pendulum.projectile import Projectile
+from pendulum.cannon import Cannon
 from pendulum.recorder import Recorder
 from pendulum.utils import FPSDisplay, GridDisplay
 
@@ -41,7 +41,7 @@ class BaseSimulation(window.Window):
         self.fps_display = FPSDisplay(window=self)
         self.grid = GridDisplay(window=self)
 
-        self.projectile = Projectile(space=self.space)
+        self.cannon = Cannon(space=self.space)
 
         self.keyboard = key.KeyStateHandler()
         self.push_handlers(self.keyboard)
@@ -54,7 +54,7 @@ class BaseSimulation(window.Window):
         self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
         self.grid.draw()
-        self.projectile.draw()
+        self.cannon.draw()
 
     def on_close(self) -> None:
         """Handle Window close event."""
@@ -66,19 +66,19 @@ class BaseSimulation(window.Window):
         if button != mouse.LEFT:
             return
 
-        self.projectile.start(x=x, y=y)
+        self.cannon.start(x=x, y=y)
 
     def on_mouse_release(self, x, y, button, modifiers):
         if button != mouse.LEFT:
             return
 
-        self.projectile.fire(x=x, y=y)
+        self.cannon.fire(x=x, y=y)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         if not (buttons & mouse.LEFT):
             return
 
-        self.projectile.update_aim(x=x, y=y)
+        self.cannon.aim(x=x, y=y)
 
     def on_key_release(self, symbol, modifiers):
         if symbol == key.G:

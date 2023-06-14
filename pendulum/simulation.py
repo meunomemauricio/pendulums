@@ -6,8 +6,8 @@ from pymunk.pyglet_util import DrawOptions
 
 from pendulum import settings as sett
 from pendulum.munk.entities import Circle
-from pendulum.munk.utils import FPSDisplay, GridDisplay
 from pendulum.recorder import Recorder
+from pendulum.utils import FPSDisplay, GridDisplay
 
 
 class BaseSimulation(window.Window):

@@ -14,6 +14,7 @@ class Circle:
         mass: float,
         radius: float,
         initial_pos: pymunk.Vec2d = pymunk.Vec2d(0, 0),
+        color: tuple[int, int, int, int] | None = None,
     ):
         self.mass = mass
         self.radius = radius
@@ -26,6 +27,8 @@ class Circle:
         self.body.position = initial_pos
 
         self.shape = pymunk.Circle(body=self.body, radius=self.radius)
+        if color:
+            self.shape.color = color
 
         space.add(self.body, self.shape)
 

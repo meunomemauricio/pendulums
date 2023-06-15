@@ -10,7 +10,7 @@ class Aim:
 
     SPEED_FACTOR = 20
 
-    PATH_DOTS = 35  # How many dots to draw for the trajectory.
+    PATH_DOTS = 50  # How many dots to draw for the trajectory.
 
     DOT_COLOR = (255, 255, 0, 200)
     DOT_RADIUS = 5
@@ -91,6 +91,7 @@ class Cannon:
             mass=self.PROJECTILE_MASS,
             radius=self.PROJECTILE_RADIUS,
             initial_pos=self._aim.initial_pos,
+            color=(255, 0, 0, 255),
         )
         projectile.body.velocity = self._aim.velocity
         self._projectiles.append(projectile)

@@ -8,7 +8,7 @@ from pendulum.munk.entities import Circle
 class Aim:
     """Estimate the trajectory of a projectile and draw a path."""
 
-    SPEED_FACTOR = 20
+    SPEED_FACTOR = 5  # Factor relating length traveled by mouse to speed.
 
     PATH_DOTS = 50  # How many dots to draw for the trajectory.
 

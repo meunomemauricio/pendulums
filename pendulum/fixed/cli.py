@@ -2,6 +2,7 @@
 import click
 import pyglet
 
+from pendulum import settings as sett
 from pendulum.fixed.plot import plot_recording
 from pendulum.fixed.simulator import FixedPendulumSim
 from pendulum.recorder import prompt_recording
@@ -16,8 +17,9 @@ def fixed():
 @click.option("-r", "--record", is_flag=True, help="Record simulation data.")
 def run(record: bool):
     """Run the simulation."""
-    FixedPendulumSim(record=record)
-    pyglet.app.run()
+    window = FixedPendulumSim(record=record)
+    window.set_vsync(False)  # Allow Higher FPS
+    pyglet.app.run(interval=sett.INTERVAL)
 
 
 @fixed.command()

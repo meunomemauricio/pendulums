@@ -13,7 +13,7 @@ WIDTH = 1280
 HEIGHT = 720
 
 #: Tick Interval
-INTERVAL = 1.0 / 60
+INTERVAL = 1.0 / 120
 
 
 #: Base Project directory

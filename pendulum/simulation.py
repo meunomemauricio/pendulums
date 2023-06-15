@@ -20,12 +20,11 @@ class BaseSimulation(window.Window):
         record: bool,
         width: int = sett.WIDTH,
         height: int = sett.HEIGHT,
-        caption: str = CAPTION,
     ):
         assert self.CAPTION is not None, "CAPTION needs to be set."
         assert self.REC_FIELDS, "REC_FIELDS needs to be set."
 
-        super().__init__(width=width, height=height, caption=caption)
+        super().__init__(width=width, height=height, caption=self.CAPTION)
 
         self.recorder = (
             Recorder(fields=self.REC_FIELDS, prefix=self.REC_PREFIX)

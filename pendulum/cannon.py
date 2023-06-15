@@ -1,48 +1,72 @@
 from pyglet import graphics, shapes
 from pymunk import Space, Vec2d
 
+from pendulum import settings as sett
 from pendulum.munk.entities import Circle
 
 
 class Aim:
+    """Estimate the trajectory of a projectile and draw a path."""
 
-    AIM_LINE_WIDTH = 2
+    SPEED_FACTOR = 20
 
-    def __init__(self, initial_pos: Vec2d) -> None:
-        self._initial_pos = initial_pos
+    PATH_DOTS = 35  # How many dots to draw for the trajectory.
+
+    DOT_COLOR = (255, 255, 0, 127)
+    DOT_RADIUS = 5
+
+    def __init__(self, x: int, y: int) -> None:
+        self.initial_pos = Vec2d(x=x, y=y)
+
+        self.velocity = Vec2d(0, 0)
+
         self._batch = graphics.Batch()
+        self._dots = self._create_dots()
 
-        self._line = shapes.Line(
-            initial_pos.x,
-            initial_pos.y,
-            initial_pos.x,
-            initial_pos.y,
-            width=self.AIM_LINE_WIDTH,
-            batch=self._batch,
-        )
+    def _create_dots(self) -> list[shapes.Circle]:
+        dots = []
+        for _ in range(self.PATH_DOTS):
+            dot = shapes.Circle(
+                x=self.initial_pos.x,
+                y=self.initial_pos.y,
+                radius=self.DOT_RADIUS,
+                color=self.DOT_COLOR,
+                batch=self._batch,
+            )
+            dots.append(dot)
+
+        return dots
 
     def draw(self) -> None:
         self._batch.draw()
 
     def update(self, x: int, y: int) -> None:
-        # FIXME: Line is a little janky
-        self._line.anchor_position = (0, 0)
-        self._line.position = (x, y)
+        cur_pos = Vec2d(x=x, y=y)
+        self.velocity = (self.initial_pos - cur_pos) * self.SPEED_FACTOR
+        self._estimate_trajectory()
+
+    def _estimate_trajectory(self) -> None:
+        """Estimate the trajectory of the projectile."""
+        x_o, y_o = self.initial_pos.x, self.initial_pos.y
+        v_xo, v_yo = self.velocity.x, self.velocity.y
+        g = sett.GRAVITY[1]
+
+        for n in range(self.PATH_DOTS):
+            t_step = n * sett.INTERVAL
+            x = x_o + v_xo * t_step
+            y = y_o + v_yo * t_step + 0.5 * g * (t_step**2)
+
+            self._dots[n].position = Vec2d(x=x, y=y)
 
 
 class Cannon:
     """Draw an estimation of the path of a projectile."""
 
-    SPEED_FACTOR = 20
-
-    MASS = 1
-    RADIUS = 5
+    PROJECTILE_MASS = 0.05
+    PROJECTILE_RADIUS = 5
 
     def __init__(self, space: Space) -> None:
         self._space = space
-
-        self._initial_pos: Vec2d | None = None
-        self._line: shapes.Line | None = None
 
         # TODO: Expire the circles after a certain amount of time
         self._projectiles: list[Circle] = []
@@ -50,33 +74,28 @@ class Cannon:
         self._aim: Aim | None = None
 
     def start(self, x: int, y: int) -> None:
-        self._initial_pos = Vec2d(x=x, y=y)
-        self._aim = Aim(initial_pos=self._initial_pos)
-
-    def fire(self, x: int, y: int) -> None:
-        if not self._initial_pos:
-            raise Exception("Cannon not started.")
-
-        velocity = (self._initial_pos - Vec2d(x=x, y=y)) * self.SPEED_FACTOR
-
-        projectile = Circle(
-            space=self._space,
-            mass=self.MASS,
-            radius=self.RADIUS,
-            initial_pos=self._initial_pos,
-        )
-        projectile.body.apply_impulse_at_local_point(velocity * self.MASS)
-        self._projectiles.append(projectile)
-
-        self._aim = None
-        self._line = None
-        self._initial_pos = None
+        self._aim = Aim(x=x, y=y)
 
     def aim(self, x: int, y: int) -> None:
         if not self._aim:
-            return
+            raise Exception("Cannon not started.")
 
         self._aim.update(x=x, y=y)
+
+    def fire(self, x: int, y: int) -> None:
+        if not self._aim:
+            raise Exception("Cannon not started.")
+
+        projectile = Circle(
+            space=self._space,
+            mass=self.PROJECTILE_MASS,
+            radius=self.PROJECTILE_RADIUS,
+            initial_pos=self._aim.initial_pos,
+        )
+        projectile.body.velocity = self._aim.velocity
+        self._projectiles.append(projectile)
+
+        self._aim = None
 
     def draw(self):
         if self._aim is not None:

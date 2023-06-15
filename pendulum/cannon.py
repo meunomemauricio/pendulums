@@ -12,7 +12,7 @@ class Aim:
 
     PATH_DOTS = 35  # How many dots to draw for the trajectory.
 
-    DOT_COLOR = (255, 255, 0, 127)
+    DOT_COLOR = (255, 255, 0, 200)
     DOT_RADIUS = 5
 
     def __init__(self, x: int, y: int) -> None:
@@ -49,12 +49,12 @@ class Aim:
         """Estimate the trajectory of the projectile."""
         x_o, y_o = self.initial_pos.x, self.initial_pos.y
         v_xo, v_yo = self.velocity.x, self.velocity.y
-        g = sett.GRAVITY[1]
+        half_g = 0.5 * sett.GRAVITY[1]  # g already negative
 
         for n in range(self.PATH_DOTS):
             t_step = n * sett.INTERVAL
             x = x_o + v_xo * t_step
-            y = y_o + v_yo * t_step + 0.5 * g * (t_step**2)
+            y = y_o + v_yo * t_step + half_g * (t_step**2)
 
             self._dots[n].position = Vec2d(x=x, y=y)
 

@@ -8,7 +8,7 @@ from pendulum.munk.entities import Circle
 class Aim:
     """Estimate the trajectory of a projectile and draw a path."""
 
-    SPEED_FACTOR = 5  # Factor relating length traveled by mouse to speed.
+    SPEED_RATE = 5  # Relation between mouse travel and speed.
 
     PATH_DOTS = int(sett.CLEAR_AIM_TIME / sett.SIMULATION_STEP)
 
@@ -21,9 +21,9 @@ class Aim:
         self.velocity = Vec2d(0, 0)
 
         self._batch = graphics.Batch()
-        self._dots = self._create_dots()
+        self._dots = self._init_dots()
 
-    def _create_dots(self) -> list[shapes.Circle]:
+    def _init_dots(self) -> list[shapes.Circle]:
         dots = []
         for _ in range(self.PATH_DOTS):
             dot = shapes.Circle(
@@ -42,7 +42,7 @@ class Aim:
 
     def update(self, x: int, y: int) -> None:
         cur_pos = Vec2d(x=x, y=y)
-        self.velocity = (self.initial_pos - cur_pos) * self.SPEED_FACTOR
+        self.velocity = (self.initial_pos - cur_pos) * self.SPEED_RATE
         self._estimate_trajectory()
 
     def _estimate_trajectory(self) -> None:

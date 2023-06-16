@@ -14,14 +14,14 @@ HEIGHT = 720
 
 #: How frequently the simulation is updated. If values are higher than
 # simulation steps, the simulation appears in slow motion.
-SIMULATION_INTERVAL = 1.0 / 60
+UPDATE_INTERVAL = 1.0 / 60
 
 #: The amount of (real) time between each update in the simulation space
 SIMULATION_STEP = 1.0 / 480
 
 #: The relation between simulated time and real time (i.e. how long it takes to
 # simulate 1 second)
-SIMULATION_RATE = SIMULATION_INTERVAL / SIMULATION_STEP
+SIMULATION_RATE = UPDATE_INTERVAL / SIMULATION_STEP
 
 #: How many (real) secconds to wait before clearing the aim
 CLEAR_AIM_TIME = 0.5

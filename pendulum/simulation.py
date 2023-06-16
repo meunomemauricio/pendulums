@@ -45,7 +45,7 @@ class BaseSimulation(window.Window):
         self.keyboard = key.KeyStateHandler()
         self.push_handlers(self.keyboard)
 
-        clock.schedule_interval(self.update, interval=sett.SIMULATION_INTERVAL)
+        clock.schedule_interval(self.update, interval=sett.UPDATE_INTERVAL)
 
     def on_draw(self) -> None:
         """Screen Draw Event."""

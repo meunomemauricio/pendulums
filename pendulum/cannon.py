@@ -96,7 +96,7 @@ class Cannon:
         projectile.body.velocity = self._aim.velocity
         self._projectiles.append(projectile)
 
-        # self._aim = None
+        self._aim = None
 
     def draw(self):
         if self._aim is not None:

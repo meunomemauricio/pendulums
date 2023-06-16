@@ -2,7 +2,6 @@
 import click
 import pyglet
 
-from pendulum import settings as sett
 from pendulum.cart.parameters import Parameters
 from pendulum.cart.plot import plot_recording
 from pendulum.cart.simulator import CartPendulumSim
@@ -25,9 +24,8 @@ def run(record: bool, params: str):
         click.secho(f"Parameters '{params}' not found.", fg="bright_red")
         return
 
-    window = CartPendulumSim(record=record, params=sim_params)
-    window.set_vsync(False)  # Allow Higher FPS than monitor refresh rate.
-    pyglet.app.run(interval=sett.GRAPHICS_INTERVAL)
+    CartPendulumSim(record=record, params=sim_params)
+    pyglet.app.run()
 
 
 @cart.command()

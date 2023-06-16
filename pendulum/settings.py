@@ -12,9 +12,6 @@ GRAVITY = 0, -9807  # mm/s²
 WIDTH = 1280
 HEIGHT = 720
 
-#: Graphics Refresh Interval
-GRAPHICS_INTERVAL = 1.0 / 60
-
 #: How frequently the simulation is updated. If values are higher than
 # simulation steps, the simulation appears in slow motion.
 SIMULATION_INTERVAL = 1.0 / 60

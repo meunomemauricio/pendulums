@@ -79,7 +79,7 @@ class Recorder:
 
         Timestamp is inserted automatically.
         """
-        row = dict(ts=time.time(), interval=sett.INTERVAL, **kwargs)
+        row = dict(ts=time.time(), interval=sett.SIMULATION_STEP, **kwargs)
         self.writer.writerow(row)
 
     def close(self):

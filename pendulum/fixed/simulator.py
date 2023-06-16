@@ -75,7 +75,7 @@ class FixedPendulumSim(BaseSimulation):
         """
         self._handle_input(keyboard=self.keyboard)
 
-        self.space.step(sett.INTERVAL)
+        self.space.step(sett.SIMULATION_STEP)
 
         if self.recorder is not None:
             self.recorder.insert(

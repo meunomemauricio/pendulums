@@ -10,10 +10,10 @@ class Aim:
 
     SPEED_FACTOR = 5  # Factor relating length traveled by mouse to speed.
 
-    PATH_DOTS = 50  # How many dots to draw for the trajectory.
+    PATH_DOTS = 150
 
     DOT_COLOR = (255, 255, 0, 200)
-    DOT_RADIUS = 5
+    DOT_RADIUS = 2
 
     def __init__(self, x: int, y: int) -> None:
         self.initial_pos = Vec2d(x=x, y=y)
@@ -52,7 +52,7 @@ class Aim:
         half_g = 0.5 * sett.GRAVITY[1]  # g already negative
 
         for n in range(self.PATH_DOTS):
-            t_step = n * sett.INTERVAL
+            t_step = n * sett.SIMULATION_STEP
             x = x_o + v_xo * t_step
             y = y_o + v_yo * t_step + half_g * (t_step**2)
 
@@ -96,7 +96,7 @@ class Cannon:
         projectile.body.velocity = self._aim.velocity
         self._projectiles.append(projectile)
 
-        self._aim = None
+        # self._aim = None
 
     def draw(self):
         if self._aim is not None:

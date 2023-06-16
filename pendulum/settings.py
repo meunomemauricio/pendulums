@@ -12,9 +12,16 @@ GRAVITY = 0, -9807  # mm/s²
 WIDTH = 1280
 HEIGHT = 720
 
-#: Tick Interval
-INTERVAL = 1.0 / 120
+#: Graphics Refresh Interval
+GRAPHICS_INTERVAL = 1.0 / 60
 
+#: How frequently the simulation is updated. If values are higher than
+# simulation steps, the simulation appears in slow motion.
+SIMULATION_INTERVAL = 1.0 / 60
+
+#: Simulation Step. The amount of time between each update in the simulation
+# space
+SIMULATION_STEP = 1.0 / 480
 
 #: Base Project directory
 BASE_DIR = Path(__file__).parent.parent

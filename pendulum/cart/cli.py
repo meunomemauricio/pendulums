@@ -26,8 +26,8 @@ def run(record: bool, params: str):
         return
 
     window = CartPendulumSim(record=record, params=sim_params)
-    window.set_vsync(False)  # Allow Higher FPS
-    pyglet.app.run(interval=sett.INTERVAL)
+    window.set_vsync(False)  # Allow Higher FPS than monitor refresh rate.
+    pyglet.app.run(interval=sett.GRAPHICS_INTERVAL)
 
 
 @cart.command()

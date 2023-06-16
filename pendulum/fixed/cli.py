@@ -18,8 +18,8 @@ def fixed():
 def run(record: bool):
     """Run the simulation."""
     window = FixedPendulumSim(record=record)
-    window.set_vsync(False)  # Allow Higher FPS
-    pyglet.app.run(interval=sett.INTERVAL)
+    window.set_vsync(False)  # Allow Higher FPS than monitor refresh rate.
+    pyglet.app.run(interval=sett.GRAPHICS_INTERVAL)
 
 
 @fixed.command()

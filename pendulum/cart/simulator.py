@@ -17,7 +17,7 @@ class CartPendulumModel:
     RAIL_OFFSET = 50  # mm
 
     #: Cart Impulse
-    IMPULSE = sett.INTERVAL * 3000  # mN
+    IMPULSE = sett.SIMULATION_STEP * 3000  # mN
 
     def __init__(
         self,
@@ -86,7 +86,7 @@ class CartPendulumModel:
             )
             self.friction_joint.max_bias = 0
             self.friction_joint.max_force = (
-                self.params.cart_friction * sett.INTERVAL
+                self.params.cart_friction * sett.SIMULATION_STEP
             )
 
             self.space.add(self.friction_joint)
@@ -97,7 +97,7 @@ class CartPendulumModel:
         if not self.params.cart_friction:
             return 0.0
 
-        return self.friction_joint.impulse / sett.INTERVAL
+        return self.friction_joint.impulse / sett.SIMULATION_STEP
 
     @property
     def angle(self) -> float:
@@ -167,7 +167,7 @@ class CartPendulumSim(BaseSimulation):
         :param float dt: Time between calls of `update`.
         """
         self._handle_input()
-        self.space.step(sett.INTERVAL)
+        self.space.step(sett.SIMULATION_STEP)
         if self.recorder:
             self.recorder.insert(
                 angle=self.model.angle,

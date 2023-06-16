@@ -23,7 +23,10 @@ class FixedPendulumModel:
 
     def _create_entities(self) -> None:
         self.circle = Circle(
-            space=self.space, mass=0.100, radius=10.0, initial_pos=(640, 50)
+            space=self.space,
+            mass=0.100,
+            radius=10.0,
+            initial_pos=Vec2d(640, 50),
         )
         self.fixed = Fixed(space=self.space, pos=(640, 360))
 
@@ -72,7 +75,7 @@ class FixedPendulumSim(BaseSimulation):
         """
         self._handle_input(keyboard=self.keyboard)
 
-        self.space.step(sett.INTERVAL)
+        self.space.step(sett.SIMULATION_STEP)
 
         if self.recorder is not None:
             self.recorder.insert(

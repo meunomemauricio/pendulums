@@ -12,9 +12,19 @@ GRAVITY = 0, -9807  # mm/s²
 WIDTH = 1280
 HEIGHT = 720
 
-#: Tick Interval
-INTERVAL = 1.0 / 60
+#: How frequently the simulation is updated. If values are higher than
+# simulation steps, the simulation appears in slow motion.
+UPDATE_INTERVAL = 1.0 / 60
 
+#: The amount of (real) time between each update in the simulation space
+SIMULATION_STEP = 1.0 / 480
+
+#: The relation between simulated time and real time (i.e. how long it takes to
+# simulate 1 second)
+SIMULATION_RATE = UPDATE_INTERVAL / SIMULATION_STEP
+
+#: How many (real) secconds to wait before clearing the aim
+CLEAR_AIM_TIME = 0.5
 
 #: Base Project directory
 BASE_DIR = Path(__file__).parent.parent

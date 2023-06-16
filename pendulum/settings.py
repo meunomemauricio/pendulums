@@ -16,9 +16,15 @@ HEIGHT = 720
 # simulation steps, the simulation appears in slow motion.
 SIMULATION_INTERVAL = 1.0 / 60
 
-#: Simulation Step. The amount of time between each update in the simulation
-# space
+#: The amount of (real) time between each update in the simulation space
 SIMULATION_STEP = 1.0 / 480
+
+#: The relation between simulated time and real time (i.e. how long it takes to
+# simulate 1 second)
+SIMULATION_RATE = SIMULATION_INTERVAL / SIMULATION_STEP
+
+#: How many (real) secconds to wait before clearing the aim
+CLEAR_AIM_TIME = 0.5
 
 #: Base Project directory
 BASE_DIR = Path(__file__).parent.parent

@@ -50,10 +50,10 @@ class BaseSimulation(window.Window):
     def on_draw(self) -> None:
         """Screen Draw Event."""
         self.clear()
-        self.space.debug_draw(options=self.draw_options)
         self.fps_display.draw()
         self.grid.draw()
         self.cannon.draw()
+        self.space.debug_draw(options=self.draw_options)
 
     def on_close(self) -> None:
         """Handle Window close event."""

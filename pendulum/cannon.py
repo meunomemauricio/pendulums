@@ -1,4 +1,4 @@
-from pyglet import graphics, shapes
+from pyglet import clock, graphics, shapes
 from pymunk import Space, Vec2d
 
 from pendulum import settings as sett
@@ -10,9 +10,9 @@ class Aim:
 
     SPEED_FACTOR = 5  # Factor relating length traveled by mouse to speed.
 
-    PATH_DOTS = 150
+    PATH_DOTS = int(sett.CLEAR_AIM_TIME / sett.SIMULATION_STEP)
 
-    DOT_COLOR = (255, 255, 0, 200)
+    DOT_COLOR = (255, 255, 0, 100)
     DOT_RADIUS = 2
 
     def __init__(self, x: int, y: int) -> None:
@@ -65,6 +65,8 @@ class Cannon:
     PROJECTILE_MASS = 0.05
     PROJECTILE_RADIUS = 5
 
+    CLEAR_AIM_INTERVAL = sett.CLEAR_AIM_TIME * sett.SIMULATION_RATE
+
     def __init__(self, space: Space) -> None:
         self._space = space
 
@@ -72,6 +74,9 @@ class Cannon:
         self._projectiles: list[Circle] = []
 
         self._aim: Aim | None = None
+
+    def _clear_aim(self, dt: int) -> None:
+        self._aim = None
 
     def start(self, x: int, y: int) -> None:
         self._aim = Aim(x=x, y=y)
@@ -96,7 +101,7 @@ class Cannon:
         projectile.body.velocity = self._aim.velocity
         self._projectiles.append(projectile)
 
-        self._aim = None
+        clock.schedule_once(self._clear_aim, self.CLEAR_AIM_INTERVAL)
 
     def draw(self):
         if self._aim is not None:

@@ -15,8 +15,9 @@ def cart():
 
 @cart.command()
 @click.option("-r", "--record", is_flag=True, help="Record simulation data.")
+@click.option("-C", "--controller", is_flag=True, help="Engage Controller.")
 @click.option("-p", "--params", default="rest_bottom", help="Parameters File.")
-def run(record: bool, params: str):
+def run(record: bool, controller: bool, params: str):
     """Run the simulation."""
     try:
         sim_params = Parameters.load_from_file(filename=params)
@@ -24,7 +25,7 @@ def run(record: bool, params: str):
         click.secho(f"Parameters '{params}' not found.", fg="bright_red")
         return
 
-    CartPendulumSim(record=record, params=sim_params)
+    CartPendulumSim(record=record, controller=controller, params=sim_params)
     pyglet.app.run()
 
 

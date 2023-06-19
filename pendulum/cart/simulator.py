@@ -5,6 +5,7 @@ from pyglet.window import key
 from pymunk import Vec2d
 
 from pendulum import settings as sett
+from pendulum.cart.controller import LQRController
 from pendulum.cart.parameters import Parameters
 from pendulum.munk.entities import Cart, Circle
 from pendulum.simulation import BaseSimulation
@@ -15,9 +16,6 @@ class CartPendulumModel:
 
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
-
-    #: Cart Impulse
-    IMPULSE = sett.SIMULATION_STEP * 3000  # mN
 
     def __init__(
         self,
@@ -129,12 +127,17 @@ class CartPendulumModel:
         """Pendulum Vector, from Fixed point to the center of the Cart."""
         return self.circle.body.position - self.cart.body.position
 
-    def accelerate_left(self) -> None:
-        impulse = Vec2d(-self.IMPULSE, 0)
-        self.cart.body.apply_impulse_at_local_point(impulse=impulse)
+    @property
+    def output(self) -> tuple[float, float, float, float]:
+        """Output variables of the system."""
+        return (
+            self.cart_x,
+            self.cart_velocity,
+            self.angle,
+            self.angular_velocity,
+        )
 
-    def accelerate_right(self) -> None:
-        impulse = Vec2d(self.IMPULSE, 0)
+    def apply_impulse(self, impulse) -> None:
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
 
@@ -154,8 +157,13 @@ class CartPendulumSim(BaseSimulation):
         "input_right",
     )
 
-    def __init__(self, record: bool, params: Parameters):
+    #: Keyboard Input Impulse
+    IMPULSE = sett.SIMULATION_STEP * 3000  # mN
+
+    def __init__(self, record: bool, controller: bool, params: Parameters):
         super().__init__(record=record)
+
+        self.controller = LQRController() if controller else None
 
         self.model = CartPendulumModel(
             space=self.space, window=self, params=params
@@ -167,6 +175,7 @@ class CartPendulumSim(BaseSimulation):
         :param float dt: Time between calls of `update`.
         """
         self._handle_input()
+        self._handle_controller()
         self.space.step(sett.SIMULATION_STEP)
         if self.recorder:
             self.recorder.insert(
@@ -179,8 +188,15 @@ class CartPendulumSim(BaseSimulation):
                 input_right=self.keyboard[key.RIGHT],
             )
 
+    def _handle_controller(self) -> None:
+        if not self.controller:
+            return
+
+        impulse = self.controller.step(*self.model.output)
+        self.model.apply_impulse(impulse=impulse)
+
     def _handle_input(self) -> None:
         if self.keyboard[key.LEFT]:
-            self.model.accelerate_left()
+            self.model.apply_impulse(impulse=Vec2d(-self.IMPULSE, 0))
         elif self.keyboard[key.RIGHT]:
-            self.model.accelerate_right()
+            self.model.apply_impulse(impulse=Vec2d(self.IMPULSE, 0))

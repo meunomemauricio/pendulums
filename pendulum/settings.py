@@ -14,10 +14,10 @@ HEIGHT = 720
 
 #: How frequently the simulation is updated. If values are higher than
 # simulation steps, the simulation appears in slow motion.
-UPDATE_INTERVAL = 1.0 / 60
+UPDATE_INTERVAL = 1.0 / 120
 
 #: The amount of (real) time between each update in the simulation space
-SIMULATION_STEP = 1.0 / 480
+SIMULATION_STEP = 1.0 / 240
 
 #: The relation between simulated time and real time (i.e. how long it takes to
 # simulate 1 second)

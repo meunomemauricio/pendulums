@@ -1,10 +1,14 @@
 """PyMunk simulation of a Pendulum attached to a moving Cart."""
+import math
+
+import numpy as np
 import pymunk
-from pyglet import window
+from pyglet import graphics, text, window
 from pyglet.window import key
 from pymunk import Vec2d
 
 from pendulum import settings as sett
+from pendulum.cart.controller import LQRController
 from pendulum.cart.parameters import Parameters
 from pendulum.munk.entities import Cart, Circle
 from pendulum.simulation import BaseSimulation
@@ -15,9 +19,6 @@ class CartPendulumModel:
 
     #: Distance between the rail endings and the screen width
     RAIL_OFFSET = 50  # mm
-
-    #: Cart Impulse
-    IMPULSE = sett.SIMULATION_STEP * 3000  # mN
 
     def __init__(
         self,
@@ -32,7 +33,7 @@ class CartPendulumModel:
         self._create_entities()
         self._create_constraints()
 
-        self._last_angle = self.params.angle
+        self._last_angle = math.radians(self.params.angle)
 
     def _create_entities(self) -> None:
         cart_pos_x = (self.window.width / 2) + self.params.cart_x
@@ -101,15 +102,27 @@ class CartPendulumModel:
 
     @property
     def angle(self) -> float:
-        """Angle (deg) between the Pendulum and the resting location."""
-        return -self.vector.get_angle_degrees_between(Vec2d(0, -1))
+        """Angle (rad) between the Pendulum and the resting location.
+
+        Avoid negative angles around pi, which is supposed to be the
+        setpoint for the controller.
+        """
+        angle = -self.vector.get_angle_between(Vec2d(0, -1))
+        if angle < 0:
+            angle = 2 * np.pi + angle
+
+        return angle
 
     @property
     def angular_velocity(self) -> float:
-        """Pendulum Angular Velocity (dev/s)."""
-        ang_vel = self.angle - self._last_angle
-        self._last_angle = self.angle
-        return ang_vel
+        """Pendulum Angular Velocity (rad/s)."""
+        ang_diff = self.angle - self._last_angle
+        if ang_diff > np.pi:
+            ang_diff = -(2 * np.pi - ang_diff)
+        elif ang_diff < -np.pi:
+            ang_diff = 2 * np.pi + ang_diff
+
+        return ang_diff / sett.SIMULATION_STEP
 
     @property
     def cart_x(self) -> float:
@@ -129,13 +142,21 @@ class CartPendulumModel:
         """Pendulum Vector, from Fixed point to the center of the Cart."""
         return self.circle.body.position - self.cart.body.position
 
-    def accelerate_left(self) -> None:
-        impulse = Vec2d(-self.IMPULSE, 0)
+    @property
+    def output(self) -> tuple[float, float, float, float]:
+        """Output variables of the system."""
+        return (
+            self.cart_x,
+            self.cart_velocity,
+            self.angle,
+            self.angular_velocity,
+        )
+
+    def apply_impulse(self, impulse) -> None:
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
-    def accelerate_right(self) -> None:
-        impulse = Vec2d(self.IMPULSE, 0)
-        self.cart.body.apply_impulse_at_local_point(impulse=impulse)
+    def step(self) -> None:
+        self._last_angle = self.angle
 
 
 class CartPendulumSim(BaseSimulation):
@@ -150,15 +171,62 @@ class CartPendulumSim(BaseSimulation):
         "cart_friction",
         "cart_x",
         "cart_velocity",
+        "impulse",
         "input_left",
         "input_right",
     )
 
-    def __init__(self, record: bool, params: Parameters):
+    #: Keyboard Input Impulse
+    IMPULSE = sett.SIMULATION_STEP * 3000  # mN
+
+    def __init__(self, record: bool, controller: bool, params: Parameters):
         super().__init__(record=record)
+
+        self.controller = LQRController(is_active=controller)
 
         self.model = CartPendulumModel(
             space=self.space, window=self, params=params
+        )
+
+        self.batch = graphics.Batch()
+        self._create_debug_labels()
+
+    def _create_debug_labels(self) -> None:
+        # TODO: There must be a better way (FormattedDocument?)
+        self.x_label = text.Label(
+            font_size=16,
+            x=5,
+            y=self.height - (16 * 1.5),
+            color=(0, 255, 0, 255),
+            batch=self.batch,
+        )
+        self.v_label = text.Label(
+            font_size=16,
+            x=5,
+            y=self.height - 2 * (16 * 1.5),
+            color=(0, 255, 0, 255),
+            batch=self.batch,
+        )
+        self.o_label = text.Label(
+            font_size=16,
+            x=5,
+            y=self.height - 3 * (16 * 1.5),
+            color=(0, 255, 0, 255),
+            batch=self.batch,
+        )
+        self.w_label = text.Label(
+            font_size=16,
+            x=5,
+            y=self.height - 4 * (16 * 1.5),
+            color=(0, 255, 0, 255),
+            batch=self.batch,
+        )
+        self.controller_label = text.Label(
+            font_size=16,
+            x=5,
+            y=self.height - 5 * (16 * 1.5),
+            color=(0, 255, 255, 255),
+            batch=self.batch,
         )
 
     def update(self, dt: float) -> None:
@@ -167,7 +235,9 @@ class CartPendulumSim(BaseSimulation):
         :param float dt: Time between calls of `update`.
         """
         self._handle_input()
-        self.space.step(sett.SIMULATION_STEP)
+        impulse = self._update_controller()
+        self._step_space()
+
         if self.recorder:
             self.recorder.insert(
                 angle=self.model.angle,
@@ -175,12 +245,34 @@ class CartPendulumSim(BaseSimulation):
                 cart_friction=self.model.cart_friction,
                 cart_velocity=self.model.cart_velocity,
                 cart_x=self.model.cart_x,
+                impulse=impulse.x,
                 input_left=self.keyboard[key.LEFT],
                 input_right=self.keyboard[key.RIGHT],
             )
 
     def _handle_input(self) -> None:
         if self.keyboard[key.LEFT]:
-            self.model.accelerate_left()
+            self.model.apply_impulse(impulse=Vec2d(-self.IMPULSE, 0))
         elif self.keyboard[key.RIGHT]:
-            self.model.accelerate_right()
+            self.model.apply_impulse(impulse=Vec2d(self.IMPULSE, 0))
+
+    def _update_controller(self) -> Vec2d:
+        impulse = self.controller.step(*self.model.output)
+        self.controller_label.text = f"I: {impulse.x} nN"
+        self.model.apply_impulse(impulse=impulse)
+        return impulse
+
+    def _step_space(self) -> None:
+        self.model.step()
+        self.space.step(sett.SIMULATION_STEP)
+
+        x, v, o, w = self.model.output
+        self.x_label.text = f"x: {x:.2f} mm"
+        self.v_label.text = f"v: {v:.2f} mm/s"
+        self.o_label.text = f"θ: {o:.2f} rad"
+        self.w_label.text = f"ω:  {w:.2f} deg/s"
+
+    def on_draw(self) -> None:
+        super().on_draw()
+
+        self.batch.draw()

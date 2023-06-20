@@ -102,8 +102,16 @@ class CartPendulumModel:
 
     @property
     def angle(self) -> float:
-        """Angle (rad) between the Pendulum and the resting location."""
-        return -self.vector.get_angle_between(Vec2d(0, -1))
+        """Angle (rad) between the Pendulum and the resting location.
+
+        Avoid negative angles around pi, which is supposed to be the
+        setpoint for the controller.
+        """
+        angle = -self.vector.get_angle_between(Vec2d(0, -1))
+        if angle < 0:
+            angle = 2 * np.pi + angle
+
+        return angle
 
     @property
     def angular_velocity(self) -> float:

@@ -8,7 +8,7 @@ class LQRController:
 
     K_MATRIX = np.loadtxt("pendulum/cart/lqr_params.csv")
 
-    SET_POINT = np.array([0.0, 0.0, 180, 0.0])
+    SET_POINT = np.array([0.0, 0.0, np.pi, 0.0])
 
     def __init__(self, is_active: bool) -> None:
         self.is_active = is_active
@@ -22,6 +22,6 @@ class LQRController:
             return Vec2d(0.0, 0.0)
 
         state = np.array([x, v, theta, omega])
-        x_impulse = -self.K_MATRIX @ (state - self.SET_POINT)
+        x_impulse = self.K_MATRIX @ (state - self.SET_POINT)
         x_impulse = x_impulse * sett.SIMULATION_STEP
         return Vec2d(x_impulse, 0.0)

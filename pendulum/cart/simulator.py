@@ -1,6 +1,7 @@
 """PyMunk simulation of a Pendulum attached to a moving Cart."""
 import math
 
+import numpy as np
 import pymunk
 from pyglet import graphics, text, window
 from pyglet.window import key
@@ -107,9 +108,13 @@ class CartPendulumModel:
     @property
     def angular_velocity(self) -> float:
         """Pendulum Angular Velocity (rad/s)."""
-        ang_vel = self.angle - self._last_angle
-        self._last_angle = self.angle
-        return ang_vel
+        ang_diff = self.angle - self._last_angle
+        if ang_diff > np.pi:
+            ang_diff = -(2 * np.pi - ang_diff)
+        elif ang_diff < -np.pi:
+            ang_diff = 2 * np.pi + ang_diff
+
+        return ang_diff / sett.SIMULATION_STEP
 
     @property
     def cart_x(self) -> float:
@@ -142,6 +147,9 @@ class CartPendulumModel:
     def apply_impulse(self, impulse) -> None:
         self.cart.body.apply_impulse_at_local_point(impulse=impulse)
 
+    def step(self) -> None:
+        self._last_angle = self.angle
+
 
 class CartPendulumSim(BaseSimulation):
     """Application simulating a Cart Pendulum."""
@@ -155,6 +163,7 @@ class CartPendulumSim(BaseSimulation):
         "cart_friction",
         "cart_x",
         "cart_velocity",
+        "impulse",
         "input_left",
         "input_right",
     )
@@ -218,7 +227,7 @@ class CartPendulumSim(BaseSimulation):
         :param float dt: Time between calls of `update`.
         """
         self._handle_input()
-        self._update_controller()
+        impulse = self._update_controller()
         self._step_space()
 
         if self.recorder:
@@ -228,6 +237,7 @@ class CartPendulumSim(BaseSimulation):
                 cart_friction=self.model.cart_friction,
                 cart_velocity=self.model.cart_velocity,
                 cart_x=self.model.cart_x,
+                impulse=impulse.x,
                 input_left=self.keyboard[key.LEFT],
                 input_right=self.keyboard[key.RIGHT],
             )
@@ -238,12 +248,14 @@ class CartPendulumSim(BaseSimulation):
         elif self.keyboard[key.RIGHT]:
             self.model.apply_impulse(impulse=Vec2d(self.IMPULSE, 0))
 
-    def _update_controller(self) -> None:
+    def _update_controller(self) -> Vec2d:
         impulse = self.controller.step(*self.model.output)
         self.controller_label.text = f"I: {impulse.x} nN"
         self.model.apply_impulse(impulse=impulse)
+        return impulse
 
     def _step_space(self) -> None:
+        self.model.step()
         self.space.step(sett.SIMULATION_STEP)
 
         x, v, o, w = self.model.output

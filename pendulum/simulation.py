@@ -18,6 +18,7 @@ class BaseSimulation(window.Window):
     def __init__(
         self,
         record: bool,
+        grid: bool = False,
         width: int = sett.WIDTH,
         height: int = sett.HEIGHT,
     ):
@@ -38,7 +39,7 @@ class BaseSimulation(window.Window):
         self.draw_options = DrawOptions()
 
         self.fps_display = FPSDisplay(window=self)
-        self.grid = GridDisplay(window=self)
+        self.grid = GridDisplay(window=self, enabled=grid)
 
         self.cannon = Cannon(space=self.space)
 

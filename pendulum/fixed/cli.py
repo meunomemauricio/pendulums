@@ -13,10 +13,11 @@ def fixed():
 
 
 @fixed.command()
+@click.option("-g", "--grid", is_flag=True, help="Display Grid.")
 @click.option("-r", "--record", is_flag=True, help="Record simulation data.")
-def run(record: bool):
+def run(grid: bool, record: bool):
     """Run the simulation."""
-    FixedPendulumSim(record=record)
+    FixedPendulumSim(record=record, grid=grid)
     pyglet.app.run()
 
 

@@ -179,8 +179,10 @@ class CartPendulumSim(BaseSimulation):
     #: Keyboard Input Impulse
     IMPULSE = sett.SIMULATION_STEP * 3000  # mN
 
-    def __init__(self, record: bool, controller: bool, params: Parameters):
-        super().__init__(record=record)
+    def __init__(
+        self, record: bool, grid: bool, controller: bool, params: Parameters
+    ):
+        super().__init__(record=record, grid=grid)
 
         self.controller = LQRController(is_active=controller)
 

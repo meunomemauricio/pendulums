@@ -25,10 +25,10 @@ class GridDisplay:
 
     GRID_STEP_SIZE = 50
 
-    def __init__(self, window: window.Window):
+    def __init__(self, window: window.Window, enabled: bool = True):
         self.window = window
 
-        self.enabled = True
+        self.enabled = enabled
 
         self._lines: list[shapes.ShapeBase] = []
         self._batch = graphics.Batch()

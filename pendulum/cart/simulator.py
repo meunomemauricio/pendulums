@@ -180,9 +180,14 @@ class CartPendulumSim(BaseSimulation):
     IMPULSE = sett.SIMULATION_STEP * 3000  # mN
 
     def __init__(
-        self, record: bool, grid: bool, controller: bool, params: Parameters
+        self,
+        record: bool,
+        grid: bool,
+        export: bool,
+        controller: bool,
+        params: Parameters,
     ):
-        super().__init__(record=record, grid=grid)
+        super().__init__(record=record, export=export, grid=grid)
 
         self.controller = LQRController(is_active=controller)
 

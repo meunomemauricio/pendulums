@@ -1,5 +1,7 @@
 """Utility Functions and Classes."""
-from pyglet import graphics, shapes, text, window
+from pyglet import graphics, image, shapes, text, window
+
+from pendulum import settings as sett
 
 
 class FPSDisplay(window.FPSDisplay):
@@ -93,3 +95,24 @@ class GridDisplay:
 
     def toggle(self) -> None:
         self.enabled = not self.enabled
+
+
+class AnimationExporter:
+    def __init__(self, enabled: bool) -> None:
+        self.enabled = enabled
+        self._frame_count = 0
+
+        self._clear_files()
+
+    def _clear_files(self) -> None:
+        for filepath in sett.PNG_EXPORT_PATH.iterdir():
+            filepath.unlink()
+
+    def save_frame(self):
+        if not self.enabled:
+            return
+
+        filepath = sett.PNG_EXPORT_PATH / f"frame_{self._frame_count:04d}.png"
+        image.get_buffer_manager().get_color_buffer().save(filepath)
+
+        self._frame_count += 1

@@ -15,10 +15,11 @@ def cart():
 
 @cart.command()
 @click.option("-C", "--controller", is_flag=True, help="Engage Controller.")
+@click.option("-e", "--export", is_flag=True, help="Export Animation.")
 @click.option("-g", "--grid", is_flag=True, help="Display Grid.")
 @click.option("-p", "--params", default="rest_bottom", help="Parameters File.")
 @click.option("-r", "--record", is_flag=True, help="Record simulation data.")
-def run(controller: bool, grid: bool, params: str, record: bool):
+def run(controller: bool, export: bool, grid: bool, params: str, record: bool):
     """Run the simulation."""
     try:
         sim_params = Parameters.load_from_file(filename=params)
@@ -28,6 +29,7 @@ def run(controller: bool, grid: bool, params: str, record: bool):
 
     CartPendulumSim(
         record=record,
+        export=export,
         grid=grid,
         controller=controller,
         params=sim_params,

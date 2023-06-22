@@ -43,3 +43,9 @@ PLOT_PATH = DATA_PATH / "plot"
 if not PLOT_PATH.exists():
     click.secho("Plot path doesn't exist. Creating it.", fg="yellow")
     PLOT_PATH.mkdir()
+
+#: PNG Export Path
+PNG_EXPORT_PATH = DATA_PATH / "export"
+if not PNG_EXPORT_PATH.exists():
+    click.secho("Export path doesn't exist. Creating it.", fg="yellow")
+    PNG_EXPORT_PATH.mkdir()

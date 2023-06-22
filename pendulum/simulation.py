@@ -6,7 +6,7 @@ from pymunk.pyglet_util import DrawOptions
 from pendulum import settings as sett
 from pendulum.cannon import Cannon
 from pendulum.recorder import Recorder
-from pendulum.utils import FPSDisplay, GridDisplay
+from pendulum.utils import AnimationExporter, FPSDisplay, GridDisplay
 
 
 class BaseSimulation(window.Window):
@@ -18,6 +18,7 @@ class BaseSimulation(window.Window):
     def __init__(
         self,
         record: bool,
+        export: bool = False,
         grid: bool = False,
         width: int = sett.WIDTH,
         height: int = sett.HEIGHT,
@@ -39,6 +40,7 @@ class BaseSimulation(window.Window):
         self.draw_options = DrawOptions()
 
         self.fps_display = FPSDisplay(window=self)
+        self.exporter = AnimationExporter(enabled=export)
         self.grid = GridDisplay(window=self, enabled=grid)
 
         self.cannon = Cannon(space=self.space)
@@ -55,6 +57,7 @@ class BaseSimulation(window.Window):
         self.grid.draw()
         self.cannon.draw()
         self.space.debug_draw(options=self.draw_options)
+        self.exporter.save_frame()
 
     def on_close(self) -> None:
         """Handle Window close event."""

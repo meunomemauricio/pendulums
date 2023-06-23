@@ -57,7 +57,16 @@ class BaseSimulation(window.Window):
         self.grid.draw()
         self.cannon.draw()
         self.space.debug_draw(options=self.draw_options)
+        self.draw_extra()
         self.exporter.save_frame()
+
+    def draw_extra(self) -> None:
+        """Draw simulation specific graphics.
+
+        Use this method, instead of overriding `on_draw`. This will make sure
+        that the extra stuff is drawn before exporting the frame.
+        """
+        pass
 
     def on_close(self) -> None:
         """Handle Window close event."""

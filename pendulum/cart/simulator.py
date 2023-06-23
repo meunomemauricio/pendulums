@@ -279,7 +279,5 @@ class CartPendulumSim(BaseSimulation):
         self.o_label.text = f"θ: {o:.2f} rad"
         self.w_label.text = f"ω:  {w:.2f} deg/s"
 
-    def on_draw(self) -> None:
-        super().on_draw()
-
+    def draw_extra(self) -> None:
         self.batch.draw()

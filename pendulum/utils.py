@@ -129,9 +129,12 @@ def render_animation(name: str = None) -> None:
     ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filepath = sett.GIF_EXPORT_PATH / f"{name}_{ts}.gif"
 
-    click.echo(f"Rendering animation to {filepath}...")
-
+    click.secho(f"Rendering animation to '{filepath}'...", fg="bright_green")
+    img_files = sorted(
+        list(sett.PNG_EXPORT_PATH.iterdir()), key=lambda x: x.stem
+    )
     with iio.get_writer(filepath, mode="I", duration=0.1) as writer:
-        for filepath in sett.PNG_EXPORT_PATH.iterdir():
-            image = iio.imread(filepath)
-            writer.append_data(image)
+        with click.progressbar(img_files) as bar:
+            for filepath in bar:
+                image = iio.imread(filepath)
+                writer.append_data(image)

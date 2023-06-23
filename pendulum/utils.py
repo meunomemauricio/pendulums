@@ -127,14 +127,14 @@ def render_animation(name: str = None) -> None:
         name = "pendulum"
 
     ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filepath = sett.GIF_EXPORT_PATH / f"{name}_{ts}.gif"
+    out_path = sett.GIF_EXPORT_PATH / f"{name}_{ts}.mp4"
 
-    click.secho(f"Rendering animation to '{filepath}'...", fg="bright_green")
+    click.secho(f"Rendering animation to '{out_path}'...", fg="bright_green")
     img_files = sorted(
         list(sett.PNG_EXPORT_PATH.iterdir()), key=lambda x: x.stem
     )
-    with iio.get_writer(filepath, mode="I", duration=0.1) as writer:
+    with iio.get_writer(out_path, format="FFMPEG", mode="I", fps=60) as writer:
         with click.progressbar(img_files) as bar:
-            for filepath in bar:
-                image = iio.imread(filepath)
+            for img_path in bar:
+                image = iio.imread(img_path)
                 writer.append_data(image)

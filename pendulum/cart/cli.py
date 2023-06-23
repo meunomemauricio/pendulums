@@ -25,6 +25,7 @@ def run(controller: bool, export: bool, grid: bool, params: str, record: bool):
         sim_params = Parameters.load_from_file(filename=params)
     except FileNotFoundError:
         click.secho(f"Parameters '{params}' not found.", fg="bright_red")
+        click.echo("\n".join((f" - {p}" for p in Parameters.available())))
         return
 
     CartPendulumSim(

@@ -45,7 +45,14 @@ if not PLOT_PATH.exists():
     PLOT_PATH.mkdir()
 
 #: PNG Export Path
-PNG_EXPORT_PATH = DATA_PATH / "export"
+PNG_EXPORT_PATH = DATA_PATH / ".png_export"
 if not PNG_EXPORT_PATH.exists():
     click.secho("Export path doesn't exist. Creating it.", fg="yellow")
     PNG_EXPORT_PATH.mkdir()
+
+
+#: Gif Destination Path
+GIF_EXPORT_PATH = DATA_PATH / "animations"
+if not GIF_EXPORT_PATH.exists():
+    click.secho("Animations path doesn't exist. Creating it.", fg="yellow")
+    GIF_EXPORT_PATH.mkdir()

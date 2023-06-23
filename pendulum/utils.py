@@ -1,4 +1,8 @@
 """Utility Functions and Classes."""
+import datetime
+
+import click
+import imageio as iio
 from pyglet import graphics, image, shapes, text, window
 
 from pendulum import settings as sett
@@ -116,3 +120,18 @@ class AnimationExporter:
         image.get_buffer_manager().get_color_buffer().save(filepath)
 
         self._frame_count += 1
+
+
+def render_animation(name: str = None) -> None:
+    if name is None:
+        name = "pendulum"
+
+    ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filepath = sett.GIF_EXPORT_PATH / f"{name}_{ts}.gif"
+
+    click.echo(f"Rendering animation to {filepath}...")
+
+    with iio.get_writer(filepath, mode="I", duration=0.1) as writer:
+        for filepath in sett.PNG_EXPORT_PATH.iterdir():
+            image = iio.imread(filepath)
+            writer.append_data(image)

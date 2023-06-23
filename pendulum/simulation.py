@@ -63,6 +63,7 @@ class BaseSimulation(window.Window):
         """Handle Window close event."""
         if self.recorder:
             self.recorder.close()
+
         super().on_close()
 
     def on_mouse_press(self, x, y, button, modifiers) -> None:

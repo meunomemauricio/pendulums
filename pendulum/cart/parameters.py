@@ -41,3 +41,10 @@ class Parameters:
             circle_mass=parameters["circle_mass"],
             circle_radius=parameters["circle_radius"],
         )
+
+    @classmethod
+    def available(cls) -> list[str]:
+        """List all the available parameters."""
+        return [
+            path.stem for path in DIRECTORY.iterdir() if path.suffix == ".json"
+        ]

@@ -82,14 +82,12 @@ class Cannon:
         self._aim = Aim(x=x, y=y)
 
     def aim(self, x: int, y: int) -> None:
-        if not self._aim:
-            raise Exception("Cannon not started.")
-
-        self._aim.update(x=x, y=y)
+        if self._aim:
+            self._aim.update(x=x, y=y)
 
     def fire(self, x: int, y: int) -> None:
         if not self._aim:
-            raise Exception("Cannon not started.")
+            return
 
         projectile = Circle(
             space=self._space,

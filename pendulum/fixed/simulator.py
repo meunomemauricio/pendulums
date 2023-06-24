@@ -63,8 +63,8 @@ class FixedPendulumSim(BaseSimulation):
         "input_right",
     )
 
-    def __init__(self, record: bool):
-        super().__init__(record=record)
+    def __init__(self, record: bool, export: bool, grid: bool):
+        super().__init__(record=record, export=export, grid=grid)
 
         self.model = FixedPendulumModel(space=self.space, window=self)
 

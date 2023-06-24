@@ -179,8 +179,15 @@ class CartPendulumSim(BaseSimulation):
     #: Keyboard Input Impulse
     IMPULSE = sett.SIMULATION_STEP * 3000  # mN
 
-    def __init__(self, record: bool, controller: bool, params: Parameters):
-        super().__init__(record=record)
+    def __init__(
+        self,
+        record: bool,
+        grid: bool,
+        export: bool,
+        controller: bool,
+        params: Parameters,
+    ):
+        super().__init__(record=record, export=export, grid=grid)
 
         self.controller = LQRController(is_active=controller)
 
@@ -272,7 +279,5 @@ class CartPendulumSim(BaseSimulation):
         self.o_label.text = f"θ: {o:.2f} rad"
         self.w_label.text = f"ω:  {w:.2f} deg/s"
 
-    def on_draw(self) -> None:
-        super().on_draw()
-
+    def draw_extra(self) -> None:
         self.batch.draw()

@@ -1,5 +1,11 @@
 """Utility Functions and Classes."""
-from pyglet import graphics, shapes, text, window
+import datetime
+
+import click
+import imageio as iio
+from pyglet import graphics, image, shapes, text, window
+
+from pendulum import settings as sett
 
 
 class FPSDisplay(window.FPSDisplay):
@@ -25,10 +31,10 @@ class GridDisplay:
 
     GRID_STEP_SIZE = 50
 
-    def __init__(self, window: window.Window):
+    def __init__(self, window: window.Window, enabled: bool = True):
         self.window = window
 
-        self.enabled = True
+        self.enabled = enabled
 
         self._lines: list[shapes.ShapeBase] = []
         self._batch = graphics.Batch()
@@ -93,3 +99,42 @@ class GridDisplay:
 
     def toggle(self) -> None:
         self.enabled = not self.enabled
+
+
+class AnimationExporter:
+    def __init__(self, enabled: bool) -> None:
+        self.enabled = enabled
+        self._frame_count = 0
+
+        self._clear_files()
+
+    def _clear_files(self) -> None:
+        for filepath in sett.PNG_EXPORT_PATH.iterdir():
+            filepath.unlink()
+
+    def save_frame(self):
+        if not self.enabled:
+            return
+
+        filepath = sett.PNG_EXPORT_PATH / f"frame_{self._frame_count:04d}.png"
+        image.get_buffer_manager().get_color_buffer().save(filepath)
+
+        self._frame_count += 1
+
+
+def render_animation(name: str = None) -> None:
+    if name is None:
+        name = "pendulum"
+
+    ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    out_path = sett.GIF_EXPORT_PATH / f"{name}_{ts}.mp4"
+
+    click.secho(f"Rendering animation to '{out_path}'...", fg="bright_green")
+    img_files = sorted(
+        list(sett.PNG_EXPORT_PATH.iterdir()), key=lambda x: x.stem
+    )
+    with iio.get_writer(out_path, format="FFMPEG", mode="I", fps=60) as writer:
+        with click.progressbar(img_files) as bar:
+            for img_path in bar:
+                image = iio.imread(img_path)
+                writer.append_data(image)
